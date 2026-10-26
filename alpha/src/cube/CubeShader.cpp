@@ -1,6 +1,5 @@
 // CubeShader manages Direct3D 9 shaders and their constants.
 #include "cube/CubeShader.h"
-#include <d3dx9math.h>
 // Shader headers are generated from the HLSL sources listed in shaders.json.
 #include "cube/shaders/WorldVertexShader.h"
 #include "cube/shaders/WorldPixelShader.h"
@@ -12,6 +11,20 @@
 namespace cube {
 using plasma::Matrix;
 using plasma::Vector;
+
+// A shader constant's four floats, built from a colour.
+struct ShaderColor {
+    float r, g, b, a;
+
+    ShaderColor() {}
+    ShaderColor(float r, float g, float b, float a)
+        : r(r),
+          g(g),
+          b(b),
+          a(a)
+    {}
+    operator const float *() const { return &r; }
+};
 
 CubeShader::CubeShader(IDirect3DDevice9 *device)
     : m_device(device)
@@ -186,9 +199,9 @@ void CubeShader::setPointLights(const Vector<4, float> *positions, const Vector<
     };
     // Converts all sixteen source colors; the shader receives the first ten.
     m_device->SetVertexShaderConstantF(m_pointLightPositions, &positions[0][0], UploadedPointLights);
-    D3DXCOLOR values[PointLightSourceCount];
+    ShaderColor values[PointLightSourceCount];
     for (int i = 0; i < PointLightSourceCount; ++i)
-        values[i] = D3DXCOLOR(colors[i][0], colors[i][1], colors[i][2], 0);
+        values[i] = ShaderColor(colors[i][0], colors[i][1], colors[i][2], 0);
     m_device->SetVertexShaderConstantF(m_pointLightColors, values[0], UploadedPointLights);
 }
 
