@@ -187,18 +187,41 @@ bool initializeDirect3D()
     return true;
 }
 
-// Resets the device to the window's client size (or the options' resolution in fullscreen) and the
-// options' antialiasing, under the game's update locks.
+// Local change: fullscreen is a borderless window covering the window's monitor instead of an exclusive
+// mode. Under Wine on GNOME/Xwayland, an exclusive-mode window that starts without focus is
+// minimized and stays black until restored. Called again from the WM_SIZE this causes; only the first
+// call for a mode changes the window.
+void applyWindowMode(bool fullscreen)
+{
+    static bool s_borderless;
+    if (fullscreen == s_borderless)
+        return;
+    s_borderless = fullscreen;
+    if (IsZoomed(g_window))
+        ShowWindow(g_window, SW_RESTORE);
+    if (fullscreen) {
+        MONITORINFO monitor;
+        monitor.cbSize = sizeof(monitor);
+        GetMonitorInfoW(MonitorFromWindow(g_window, MONITOR_DEFAULTTOPRIMARY), &monitor);
+        SetWindowLongW(g_window, GWL_STYLE, WS_POPUP | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN);
+        SetWindowPos(g_window, HWND_TOP, monitor.rcMonitor.left, monitor.rcMonitor.top,
+                     monitor.rcMonitor.right - monitor.rcMonitor.left, monitor.rcMonitor.bottom - monitor.rcMonitor.top,
+                     SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+    } else {
+        SetWindowLongW(g_window, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN);
+        SetWindowPos(g_window, HWND_TOP, 200, 200, 800, 600, SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+        ShowWindow(g_window, SW_MAXIMIZE);
+    }
+}
+
+// Resets the device to the window's client size and the options' antialiasing, under the game's
+// update locks. Local change: always windowed (see applyWindowMode); the resolution option is unused.
 void resetDevice(bool unused)
 {
     bool fullscreen = options.fullscreen != 0;
+    applyWindowMode(fullscreen);
     RECT client;
-    if (fullscreen) {
-        client.right = options.resolutionX;
-        client.bottom = options.resolutionY;
-    } else {
-        GetClientRect(g_window, &client);
-    }
+    GetClientRect(g_window, &client);
     if (client.right <= 0 || client.bottom <= 0)
         return;
     if (g_device) {
@@ -216,7 +239,7 @@ void resetDevice(bool unused)
         parameters.BackBufferFormat = D3DFMT_A8R8G8B8;
         parameters.BackBufferWidth = client.right;
         parameters.BackBufferHeight = client.bottom;
-        parameters.Windowed = !fullscreen;
+        parameters.Windowed = TRUE;
         parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
         parameters.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
         parameters.EnableAutoDepthStencil = TRUE;
@@ -397,8 +420,7 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
             if (g_game->isCursorVisible()) {
                 POINT cursor;
                 GetCursorPos(&cursor);
-                if (!options.fullscreen)
-                    ScreenToClient(g_window, &cursor);
+                ScreenToClient(g_window, &cursor);
                 g_game->handleMouseMove((float)cursor.x, (float)cursor.y);
             } else {
                 g_game->handleMouseMove((float)mouseState.lX, (float)mouseState.lY);
