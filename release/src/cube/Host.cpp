@@ -1,3 +1,4 @@
+#include "plasma/Utf16.h"
 #include <windows.h>
 #include <mmsystem.h>
 // Host packet protocol. Incoming types: 1 joins and receives a creature ID in 1..10; 2 leaves; 3 supplies compressed
@@ -434,8 +435,9 @@ void Host::receive(const CSteamID &sender, BytesIO &packet)
             int length;
             packet.read(length);
             if (length > 0) {
-                std::wstring text(length, 0);
-                packet.read(&text[0], length * 2);
+                std::vector<uint16_t> units(length);
+                packet.read(units.data(), length * 2);
+                std::wstring text = plasma::fromUtf16(units.data(), length);
                 for (std::pair<const CSteamID, Connection *> &entry : m_connections) {
                     ChatMessage message;
                     message.text = text;
@@ -701,9 +703,10 @@ void Host::update(int milliseconds)
                 packet.clear();
                 packet.write((int)PacketChat);
                 packet.write(message.creatureId);
-                int length = (int)message.text.size();
+                std::vector<uint16_t> units = plasma::toUtf16(message.text);
+                int length = (int)units.size();
                 packet.write(length);
-                packet.write(message.text.c_str(), length * 2);
+                packet.write(units.data(), length * 2);
                 send(entry.first, packet);
             }
         }

@@ -203,7 +203,7 @@ public:
     void onChangeInventoryTab(InventoryWidget *widget);
     // Handles the character selection's Delete button.
     void onDeleteCharacter();
-    // The world selection's "Delete" (deletes "Save\\world_<name>.db" and "Save\\map_<name>.db").
+    // The world selection's "Delete" (deletes "Save/world_<name>.db" and "Save/map_<name>.db").
     void onDeleteWorld();
     // Handles the character creation page's Done button.
     void onDoneCharacter();

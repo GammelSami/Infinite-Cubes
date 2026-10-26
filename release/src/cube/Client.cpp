@@ -1,3 +1,4 @@
+#include "plasma/Utf16.h"
 #include <windows.h>
 #include <mmsystem.h>
 // See cube/Client.h.
@@ -238,8 +239,9 @@ void Client::receive(const CSteamID &sender, BytesIO &packet)
         int length;
         packet.read(length);
         if (length > 0) {
-            message.text.resize(length);
-            packet.read(&message.text[0], length * 2);
+            std::vector<uint16_t> units(length);
+            packet.read(units.data(), length * 2);
+            message.text = plasma::fromUtf16(units.data(), length);
             m_game->addChatMessage(message);
         }
         break;
@@ -426,9 +428,10 @@ void Client::update()
             if (chatMessage.size()) {
                 packet.clear();
                 packet.write((int)PacketChat);
-                int length = (int)chatMessage.size();
+                std::vector<uint16_t> units = plasma::toUtf16(chatMessage);
+                int length = (int)units.size();
                 packet.write(length);
-                packet.write(chatMessage.c_str(), length * 2);
+                packet.write(units.data(), length * 2);
                 send(m_hostSteamId, packet);
             }
             if (interactionCount) {

@@ -1,3 +1,5 @@
+#include "plasma/Utf16.h"
+#include <filesystem>
 #include "plasma/Engine.h"
 #include "plasma/FileIds.h"
 #include "plasma/Node.h"
@@ -687,11 +689,11 @@ PlasmaFont *Engine::loadOutlineFont(const std::wstring &path, float size, const 
         }
     }
     std::ifstream stream;
-    stream.open(path.c_str(), std::ios::in | std::ios::binary);
+    stream.open(std::filesystem::path(path), std::ios::in | std::ios::binary);
     std::wstring directory;
     if (!stream.is_open()) {
         for (std::list<std::wstring>::iterator it = m_fontPaths.begin(); it != m_fontPaths.end(); ++it) {
-            stream.open((*it + L"/" + basename).c_str(), std::ios::in | std::ios::binary);
+            stream.open(std::filesystem::path(*it + L"/" + basename), std::ios::in | std::ios::binary);
             if (stream.is_open()) {
                 directory = *it;
                 break;
@@ -1071,7 +1073,7 @@ bool Engine::readPlasmaFileIntoNode(const std::wstring &path, Node *target, int 
     int slash = path.find_last_of(L'/');
     int backslash = path.find_last_of(L'\\');
     int separator = (std::max)(slash, backslash);
-    std::ifstream stream(path.c_str(), std::ios::binary);
+    std::ifstream stream(std::filesystem::path(path), std::ios::binary);
     if (!stream.is_open())
         return false;
     std::wstring directory = path.substr(0, separator);
@@ -1739,10 +1741,10 @@ PlasmaFont *Engine::loadPlasmaFont(const std::wstring &path, float size)
     std::wstring basename = path.substr(separator + 1, path.size() - separator - 1);
     std::wstring directory;
     std::ifstream stream;
-    stream.open(path.c_str(), std::ios::in | std::ios::binary);
+    stream.open(std::filesystem::path(path), std::ios::in | std::ios::binary);
     if (!stream.is_open()) {
         for (std::list<std::wstring>::iterator it = m_fontPaths.begin(); it != m_fontPaths.end(); ++it) {
-            stream.open((*it + L"/" + basename).c_str(), std::ios::in | std::ios::binary);
+            stream.open(std::filesystem::path(*it + L"/" + basename), std::ios::in | std::ios::binary);
             if (stream.is_open()) {
                 directory = *it;
                 break;
@@ -2073,12 +2075,10 @@ std::wstring readWString(std::istream &stream)
     int length = readValue<int>(stream);
     if (!length)
         return std::wstring(L"");
-    wchar_t *buffer = new wchar_t[length + 1];
-    buffer[length] = 0;
-    stream.read(reinterpret_cast<char *>(buffer), length * 2);
-    std::wstring value(buffer);
-    delete[] buffer;
-    return value;
+    std::vector<uint16_t> buffer(length);
+    stream.read(reinterpret_cast<char *>(buffer.data()), length * 2);
+    // Up to the first zero character.
+    return std::wstring(plasma::fromUtf16(buffer.data(), length).c_str());
 }
 
 Widget *Engine::readWidget(std::istream &stream)

@@ -22,6 +22,14 @@ target_compile_definitions(FreeImage PRIVATE FREEIMAGE_LIB OPJ_STATIC LIBRAW_NOD
 if(MINGW)
  target_compile_options(FreeImage PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-include;stdexcept;-Wno-narrowing>)
 endif()
+if(CUBE_LINUX)
+ # As FreeImage's Makefile.gnu; the old C sources predate GCC 14's stricter defaults.
+ target_compile_definitions(FreeImage PRIVATE __ANSI__ HAVE_UNISTD_H)
+ target_compile_options(FreeImage PRIVATE $<$<COMPILE_LANGUAGE:C>:-std=gnu11;-Wno-implicit-function-declaration;-Wno-incompatible-pointer-types;-Wno-int-conversion>
+  $<$<COMPILE_LANGUAGE:CXX>:-include;stdexcept;-Wno-narrowing>)
+ set_property(TARGET FreeImage PROPERTY CXX_STANDARD 14)
+ return()
+endif()
 # The old JPEG-XR SDK guiddef.h shadows the compiler SDK on MinGW.
 list(REMOVE_ITEM FI_INCLUDES "${FI}/Source/LibJXR/common/include")
 file(COPY "${FI}/Source/LibJXR/common/include/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/jxr-headers" PATTERN "guiddef.h" EXCLUDE)

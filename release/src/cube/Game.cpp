@@ -2347,8 +2347,8 @@ void Game::onBack()
 void Game::onDeleteWorld()
 {
     if (m_currentWorld >= 0 && m_currentWorld < (int)m_worlds.size()) {
-        std::string worldFile = "Save\\world_" + m_worlds[m_currentWorld]->m_name + ".db";
-        std::string mapFile = "Save\\map_" + m_worlds[m_currentWorld]->m_name + ".db";
+        std::string worldFile = "Save/world_" + m_worlds[m_currentWorld]->m_name + ".db";
+        std::string mapFile = "Save/map_" + m_worlds[m_currentWorld]->m_name + ".db";
         DeleteFileA(worldFile.c_str());
         DeleteFileA(mapFile.c_str());
         delete m_worlds[m_currentWorld];
@@ -2890,7 +2890,7 @@ void Game::setStickTurn(float x, float y)
 int Game::soundId(int sound)
 {
     std::string path;
-    path = "Sounds\\";
+    path = "sounds/";
     int id;
     switch (sound) {
     case SoundHit:
@@ -4688,7 +4688,7 @@ void Game::update(double milliseconds)
         if (music != lastMusicFile) {
             lastMusicFile = music;
             EnterCriticalSection(&m_musicCriticalSection);
-            m_currentMusicFile = "Music\\" + music;
+            m_currentMusicFile = "music/" + music;
             LeaveCriticalSection(&m_musicCriticalSection);
         }
         s_nextMusicTime = success > 0 ? 10000 : 300000;

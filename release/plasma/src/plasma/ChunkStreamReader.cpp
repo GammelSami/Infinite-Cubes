@@ -1,3 +1,4 @@
+#include "plasma/Utf16.h"
 #include "plasma/ChunkStreamReader.h"
 #include <vector>
 #include "plasma/EditFilter.h"
@@ -84,12 +85,10 @@ std::wstring ChunkStreamReader::readWString()
     int length = readValue<int>();
     if (!length)
         return std::wstring(L"");
-    wchar_t *characters = new wchar_t[length + 1];
-    characters[length] = 0;
-    m_stream->read(reinterpret_cast<char *>(characters), 2 * length);
-    std::wstring result(characters);
-    delete[] characters;
-    return result;
+    std::vector<uint16_t> characters(length);
+    m_stream->read(reinterpret_cast<char *>(characters.data()), 2 * length);
+    // Up to the first zero character.
+    return std::wstring(fromUtf16(characters.data(), length).c_str());
 }
 
 void ChunkStreamReader::skipChunk()

@@ -1,5 +1,6 @@
 // Scalable font loading and rendering uses single-precision arithmetic, cached glyph maps and optional strokes.
 // Locking methods are empty.
+#include <filesystem>
 #include "plasma/ScalableFont.h"
 #include "plasma/Engine.h"
 #include "plasma/Font.h"
@@ -728,7 +729,7 @@ bool ScalableFont::loadPlasma(const std::wstring &path)
 {
     lock();
     std::ifstream file;
-    file.open(path.c_str(), std::ios::in | std::ios::binary);
+    file.open(std::filesystem::path(path), std::ios::in | std::ios::binary);
     if (!file.is_open()) {
         unlock();
         return false;
