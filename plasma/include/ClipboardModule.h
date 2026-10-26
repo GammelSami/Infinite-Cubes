@@ -30,6 +30,3 @@ void cloneNodeObjects(plasma::Node *node, std::map<void *, void *> &shapes, std:
 // HSV conversion uses saturation and value as percentages.
 plasma::Vector<4, float> hsvToRgb(const plasma::Vector<4, float> &hsv);
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

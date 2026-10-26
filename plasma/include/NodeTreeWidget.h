@@ -58,9 +58,5 @@ public:
     plasma::Node *m_disabledIcon;                 // "icon:expander:disabled".
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-
 // The thumbnail renderer limits expensive subtrees to 100 visible shapes.
 int countThumbnailShapes(plasma::Node *node);

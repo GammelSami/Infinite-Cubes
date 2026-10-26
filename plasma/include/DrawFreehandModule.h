@@ -26,6 +26,3 @@ public:
     bool m_corners;         // "freehand:corners".
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

@@ -30,10 +30,6 @@ public:
     plasma::Vector<4, float> m_savedColor;
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-
 // The recursive Douglas-Peucker step of SimplifyPath, defined in WidgetBindOperation.cpp.
 void simplifyPathSegment(float tolerance, const std::vector<plasma::Vector<2, float>> &points, int first, int last,
                          std::vector<int> &kept);

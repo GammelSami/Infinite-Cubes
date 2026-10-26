@@ -105,6 +105,3 @@ template<>
 void Widget::setConnection<ColorModule>(Connection *&connection, ColorModule *object, void (ColorModule::*method)(),
                                         bool enabledOnly);
 }
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

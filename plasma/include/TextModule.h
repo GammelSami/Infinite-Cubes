@@ -127,9 +127,3 @@ void Widget::setConnection<TextModule>(Connection *&connection, TextModule *obje
                                        bool enabledOnly);
 }
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

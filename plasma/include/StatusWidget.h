@@ -17,6 +17,3 @@ public:
     std::wstring m_extraText;  // StatusInfo; not drawn.
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

@@ -21,6 +21,3 @@ public:
     bool m_realtimeUpdate; // "performance:realtime:update".
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

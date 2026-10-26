@@ -31,6 +31,3 @@ public:
     float m_expansion;                              // Expansion fraction, from 0 to 1.
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

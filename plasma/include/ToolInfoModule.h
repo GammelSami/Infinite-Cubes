@@ -27,9 +27,3 @@ public:
     std::map<std::string, ToolInfo *> m_toolInfos; // XML "key".
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

@@ -16,6 +16,3 @@ public:
     Workspace *m_workspace;
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

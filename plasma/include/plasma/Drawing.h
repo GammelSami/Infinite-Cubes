@@ -107,9 +107,4 @@ protected:
     Vector<2, float> m_maximum; // Not initialised by the constructor.
     bool m_unused158;           // Cleared by the constructor; no other access.
 };
-
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-
 }

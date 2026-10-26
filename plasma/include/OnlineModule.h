@@ -35,10 +35,6 @@ public:
     int m_licenseMode;    // 0 inactive, 1 activate, 2 online login.
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-
 // Helpers for accessing members of other classes.
 namespace plasma {
 class Display;

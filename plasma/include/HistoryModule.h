@@ -10,6 +10,3 @@ public:
     void redo();
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

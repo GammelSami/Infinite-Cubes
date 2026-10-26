@@ -31,9 +31,4 @@ public:
     Vector<2, float> m_minimum;
     Vector<2, float> m_maximum;
 };
-
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-
 }

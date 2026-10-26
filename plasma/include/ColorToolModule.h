@@ -21,6 +21,3 @@ public:
     float m_tolerance; // "color:tool:tolerance".
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

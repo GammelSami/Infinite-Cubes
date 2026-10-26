@@ -21,6 +21,3 @@ public:
     int m_selectionMode;  // SelectionMode, box or lasso.
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

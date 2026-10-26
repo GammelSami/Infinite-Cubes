@@ -13,6 +13,3 @@ public:
     float m_progress;
     plasma::Widget *m_bar; // "progress:bar".
 };
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

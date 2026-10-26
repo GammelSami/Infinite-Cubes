@@ -44,3 +44,7 @@ Copy the data from your own installation next to the executables:
 - the `.plx` files.
 
 Then create an empty `Save/` directory. `Server.exe` listens on TCP port 12345 and stops on `q`.
+
+The game runs on Windows 7 and later. Like the original, its sound uses XAudio2 2.7 from the
+[DirectX End-User Runtime](https://www.microsoft.com/en-us/download/details.aspx?id=8109) (June 2010), which
+Windows does not include: without it, the game reports that XAudio2 could not be initialized and exits.

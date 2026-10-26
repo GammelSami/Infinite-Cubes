@@ -1,6 +1,6 @@
 // XAudio2Engine plays sounds and music. The RIFF chunk helpers read either files or database blobs.
 #include <windows.h>
-#include <xaudio2.h>
+#include "XAudio2_7.h"
 #include "cube/XAudio2Engine.h"
 #include "cube/BytesIO.h"
 #include "cube/Database.h"
@@ -185,7 +185,7 @@ void XAudio2Engine::cleanUp()
 bool XAudio2Engine::initialize()
 {
     CoInitializeEx(NULL, COINIT_MULTITHREADED);
-    if (FAILED(XAudio2Create(&m_xaudio2, 0, XAUDIO2_DEFAULT_PROCESSOR)))
+    if (FAILED(XAudio2Create(&m_xaudio2)))
         return false;
     if (FAILED(m_xaudio2->CreateMasteringVoice(&m_masteringVoice)))
         return false;

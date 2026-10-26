@@ -64,9 +64,6 @@ template<>
 void Widget::setConnection<SpecialColorModule>(Connection *&connection, SpecialColorModule *object,
                                                void (SpecialColorModule::*method)(), bool enabledOnly);
 }
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
 
 #include "../vendor/pugixml-0.9/src/pugixml.hpp"
 std::wstring getXmlText(const pugi::xml_node &node);

@@ -18,6 +18,3 @@ public:
 void drawAnnulus(const plasma::Vector<2, float> &center, float innerRadius, float outerRadius,
                  const plasma::Vector<4, float> &outline, const plasma::Vector<4, float> &fill);
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

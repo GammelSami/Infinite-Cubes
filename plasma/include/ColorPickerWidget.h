@@ -22,6 +22,3 @@ public:
     plasma::Vector<4, float> m_hsv; // Initially 240 degrees hue, 100% saturation and brightness, and alpha 1.
     int m_barWidth;                 // Initially 15 display units.
 };
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

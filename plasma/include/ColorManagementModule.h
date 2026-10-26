@@ -46,9 +46,6 @@ template<>
 void Widget::setConnection<ColorManagementModule>(Connection *&connection, ColorManagementModule *object,
                                                   void (ColorManagementModule::*method)(), bool enabledOnly);
 }
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
 
 // The byte string of a wide one, character by character.
 std::string narrowString(const std::wstring &text);

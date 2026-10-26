@@ -31,9 +31,4 @@ public:
 
     void setSource(const std::wstring &source) { m_source.assign(source); }
 };
-
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-
 }

@@ -24,6 +24,3 @@ public:
     int m_unused174;                        // Untouched by the constructor; no reader in the tree.
     std::map<unsigned, void *> m_unusedMap; // Constructed and destroyed, but otherwise unused.
 };
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

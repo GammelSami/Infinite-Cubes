@@ -8,6 +8,3 @@ public:
     virtual void build();
     void close();
 };
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

@@ -28,10 +28,6 @@ public:
     plasma::Widget *m_editWidget;    // Floating sequence editor.
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-
 // One attribute row of a timeline track: the rows' attribute names select the keyable's attributes whose keys are
 // marked.
 // The animation module displays the selected nodes' attribute keys for SequenceModule::m_sequenceName. It uses

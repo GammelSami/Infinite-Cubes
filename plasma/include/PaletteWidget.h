@@ -29,6 +29,3 @@ public:
     int m_cellWidth;  // Initially 15.
     int m_cellHeight; // Initially 15.
 };
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

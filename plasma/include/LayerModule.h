@@ -17,6 +17,3 @@ public:
     NodeTreeWidget *m_layerWidget; // "layers:listbox:list".
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

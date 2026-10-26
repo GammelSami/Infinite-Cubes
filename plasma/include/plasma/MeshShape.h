@@ -142,9 +142,4 @@ public:
     std::set<std::pair<int, int>> m_boundaryEdges; // The faces' directed edges without a reverse (SetFaces).
     std::vector<std::vector<int>> m_contours;
 };
-
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-
 }

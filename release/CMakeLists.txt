@@ -139,15 +139,12 @@ endif()
 if(MINGW)
   target_link_options(cubeworld PRIVATE -static -static-libgcc -static-libstdc++)
 else()
-  target_compile_options(cubeworld PRIVATE /bigobj /EHsc)
+  target_compile_options(cubeworld PRIVATE /std:c++17 /bigobj /EHsc)
 endif()
 
 include(cmake/Shaders.cmake)
-if(MINGW)
- target_link_libraries(cubeworld PRIVATE xaudio2_8)
-else()
- target_link_libraries(cubeworld PRIVATE xaudio2)
-endif()
+# XAudio2 2.8 (Windows 8 and later), the version the game was written for.
+target_link_libraries(cubeworld PRIVATE xaudio2_8)
 if(MINGW)
   # This large sequence of sprite registrations otherwise triggers very costly GCC inlining.
   set_source_files_properties(src/cube/SpriteManager.cpp PROPERTIES COMPILE_OPTIONS -O1)

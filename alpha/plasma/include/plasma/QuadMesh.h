@@ -69,14 +69,4 @@ public:
     Concurrency::concurrent_vector<QuadEdge> m_edges;
     Concurrency::concurrent_vector<QuadVertex *> m_vertices;
 };
-
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-#endif
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-#endif
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-#endif
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-#endif
-
 }

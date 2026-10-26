@@ -198,9 +198,3 @@ public:
 // Also used by the mesh and curve shapes.
 bool isPointInTriangle(const plasma::Vector<2, float> *corners, const plasma::Vector<2, float> &point);
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

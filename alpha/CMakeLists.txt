@@ -112,7 +112,7 @@ target_include_directories(zlibstatic PUBLIC "${zlib_source_SOURCE_DIR}" "${zlib
 include(cmake/FreeImage.cmake)
 target_include_directories(FreeImage INTERFACE "${FI}/Source")
 target_compile_definitions(FreeImage INTERFACE FREEIMAGE_LIB)
-add_executable(Cube WIN32 
+add_executable(Cube WIN32
  src/abstr/Machine.cpp
  src/cube/widgets/AdaptionWidget.cpp
  src/cube/Animation.cpp
@@ -214,7 +214,7 @@ add_executable(Cube WIN32
  plasma/src/plasma/Transformation.cpp
  plasma/src/plasma/Widget.cpp
 )
-target_include_directories(Cube PRIVATE include plasma/include)
+target_include_directories(Cube PRIVATE include plasma/include platform)
 target_compile_definitions(Cube PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN _WIN32_WINNT=0x0601 _CRT_SECURE_NO_WARNINGS)
 option(CUBE_SCRIPTING "The interface script engine (abstr::Machine, cube::System), which runs db.dat's check at start" ON)
 if(CUBE_SCRIPTING)
@@ -223,7 +223,7 @@ else()
  target_compile_definitions(Cube PRIVATE CUBE_SCRIPTING=0)
 endif()
 target_link_libraries(Cube PRIVATE pugixml sqlite zlibstatic d3d9 dinput8 dxguid winmm ws2_32 iphlpapi glu32 gdi32 ole32 shell32)
-add_executable(Server 
+add_executable(Server
  src/cube/Animation.cpp
  src/cube/CombatBehavior.cpp
  src/cube/CompanionBehavior.cpp
@@ -268,16 +268,11 @@ foreach(app Cube Server)
   target_compile_options(${app} PRIVATE -fwrapv -Wa,-mbig-obj)
   target_link_options(${app} PRIVATE -static -static-libgcc -static-libstdc++)
  else()
-  target_compile_options(${app} PRIVATE /bigobj /EHsc)
+  target_compile_options(${app} PRIVATE /std:c++17 /bigobj /EHsc)
  endif()
 endforeach()
 include(cmake/Shaders.cmake)
 
-if(MINGW)
- target_link_libraries(Cube PRIVATE xaudio2_8)
-else()
- target_link_libraries(Cube PRIVATE xaudio2)
-endif()
 
 if(MINGW)
  # Avoid costly inlining of the large sprite registration table.

@@ -114,13 +114,6 @@ public:
     CRITICAL_SECTION m_lock;
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-
 void smoothDrawingReset(Drawing *drawing);
 
 void refineContourPositions(std::vector<int> &types, int step, std::vector<Vector<2, float>> &positions, int segments,

@@ -1,7 +1,9 @@
+// Compatibility wrappers for parallel loops and concurrent vectors. MSVC uses its Concurrency Runtime; other compilers
+// execute loops sequentially and use deques, which keep element addresses stable like concurrent_vector.
 #pragma once
 #ifdef _MSC_VER
-#include "plasma/Parallel.h"
-#include "plasma/Parallel.h"
+#include <ppl.h>
+#include <concurrent_vector.h>
 #else
 #include <algorithm>
 #include <deque>

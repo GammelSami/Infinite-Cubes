@@ -63,9 +63,4 @@ void refineCurveColors(std::vector<Vector<4, float>> &values, int stride, int fl
                        unsigned offset, std::vector<int> flags);
 void refineCurveWidths(unsigned offset, std::vector<float> &values, int stride, int flagStride, int count, bool closed,
                        std::vector<int> flags);
-
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-
 }

@@ -143,6 +143,3 @@ inline plasma::Vector<4, float> &TextInterface::getColor(int colorTarget)
     return m_shape->m_extrusionColor.value();
 }
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

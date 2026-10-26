@@ -24,6 +24,3 @@ public:
     bool m_moveY;   // "grid:move:y/xy".
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif

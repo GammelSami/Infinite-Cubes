@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <xaudio2.h>
+#include "XAudio2_7.h"
 #include <vorbis/vorbisfile.h>
 
 namespace cube {

@@ -95,10 +95,6 @@ public:
     ShapeInterface *m_shapeInterface; // The shape's editing interface, if any.
 };
 
-#if !defined(PLASMA_PORTABLE) && !defined(_WIN64)
-
-#endif
-
 // The interface of the other shapes (GenericInterface): a GenericShape (a source instance or a placeholder
 // rectangle) has no editable vertices, only its bounds. NodeInterface::Refresh makes one for a GenericShape.
 class GenericInterface : public ShapeInterface {
