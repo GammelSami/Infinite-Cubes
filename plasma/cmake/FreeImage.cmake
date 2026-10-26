@@ -41,6 +41,17 @@ string(REPLACE "(unsigned long)" "(size_t)" EXR_READING "${EXR_READING}")
 if(NOT EXR_READING STREQUAL EXR_READING_OLD)
  file(WRITE "${FI}/Source/OpenEXR/IlmImf/ImfOptimizedPixelReading.h" "${EXR_READING}")
 endif()
+# ImfAttribute.cpp uses std::binary_function but includes only <map>; current MSVC
+# standard libraries declare it in <functional> alone.
+file(READ "${FI}/Source/OpenEXR/IlmImf/ImfAttribute.cpp" EXR_ATTRIBUTE)
+set(EXR_ATTRIBUTE_OLD "${EXR_ATTRIBUTE}")
+string(REPLACE "#include <map>\n" "#include <map>\n#include <functional>\n" EXR_ATTRIBUTE "${EXR_ATTRIBUTE}")
+if(NOT EXR_ATTRIBUTE MATCHES "#include <functional>")
+ message(FATAL_ERROR "FreeImage: ImfAttribute.cpp no longer has the include this build patches")
+endif()
+if(NOT EXR_ATTRIBUTE STREQUAL EXR_ATTRIBUTE_OLD)
+ file(WRITE "${FI}/Source/OpenEXR/IlmImf/ImfAttribute.cpp" "${EXR_ATTRIBUTE}")
+endif()
 # Current MinGW provides the same byte-swap routine as the Windows CRT.
 file(READ "${FI}/Source/LibJXR/image/sys/strcodec.c" JXR_CODEC)
 set(JXR_CODEC_OLD "${JXR_CODEC}")
