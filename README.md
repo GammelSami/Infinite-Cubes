@@ -12,7 +12,7 @@ You MUST already own a copy of the respective software to use it, and you must
 use your own copy to provide assets for the software to work.
 
 The code provided is roughly 95% validated, and the remaining 5% may contain
-bugs not found in the original sofrware. Open issues for these to be fixed;
+bugs not found in the original software. Open issues for these to be fixed;
 pull requests will not be accepted. Once fixed, you can pull the changes into
 your own fork.
 
