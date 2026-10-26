@@ -1,0 +1,1 @@
+Upstream source versions, archive URLs and SHA-256 file pins are recorded in manifest.json. SQLite is stored as an xz-compressed source file and expanded in the build directory. The sources are retained verbatim except documented portability fixes. Steam headers are from the pinned CWSDK revision in the manifest.

@@ -1,0 +1,334 @@
+// Keyboard and mouse binding display names.
+#include <dinput.h>
+#include <sstream>
+#include "cube/KeyNames.h"
+
+namespace cube {
+
+KeyNames::KeyNames()
+{
+    m_fullNames[DIK_ESCAPE] = L"Escape";
+    m_fullNames[DIK_1] = L"1";
+    m_fullNames[DIK_2] = L"2";
+    m_fullNames[DIK_3] = L"3";
+    m_fullNames[DIK_4] = L"4";
+    m_fullNames[DIK_5] = L"5";
+    m_fullNames[DIK_6] = L"6";
+    m_fullNames[DIK_7] = L"7";
+    m_fullNames[DIK_8] = L"8";
+    m_fullNames[DIK_9] = L"9";
+    m_fullNames[DIK_0] = L"0";
+    m_fullNames[DIK_MINUS] = L"-";
+    m_fullNames[DIK_EQUALS] = L"=";
+    m_fullNames[DIK_BACK] = L"Backspace";
+    m_fullNames[DIK_TAB] = L"Tab";
+    m_fullNames[DIK_Q] = L"Q";
+    m_fullNames[DIK_W] = L"W";
+    m_fullNames[DIK_E] = L"E";
+    m_fullNames[DIK_R] = L"R";
+    m_fullNames[DIK_T] = L"T";
+    m_fullNames[DIK_Y] = L"Y";
+    m_fullNames[DIK_U] = L"U";
+    m_fullNames[DIK_I] = L"I";
+    m_fullNames[DIK_O] = L"O";
+    m_fullNames[DIK_P] = L"P";
+    m_fullNames[DIK_LBRACKET] = L"[";
+    m_fullNames[DIK_RBRACKET] = L"]";
+    m_fullNames[DIK_RETURN] = L"Return";
+    m_fullNames[DIK_LCONTROL] = L"Left Control";
+    m_fullNames[DIK_A] = L"A";
+    m_fullNames[DIK_S] = L"S";
+    m_fullNames[DIK_D] = L"D";
+    m_fullNames[DIK_F] = L"F";
+    m_fullNames[DIK_G] = L"G";
+    m_fullNames[DIK_H] = L"H";
+    m_fullNames[DIK_J] = L"J";
+    m_fullNames[DIK_K] = L"K";
+    m_fullNames[DIK_L] = L"L";
+    m_fullNames[DIK_SEMICOLON] = L";";
+    m_fullNames[DIK_APOSTROPHE] = L"'";
+    m_fullNames[DIK_GRAVE] = L"`";
+    m_fullNames[DIK_LSHIFT] = L"Left Shift";
+    m_fullNames[DIK_BACKSLASH] = L"\\";
+    m_fullNames[DIK_Z] = L"Z";
+    m_fullNames[DIK_X] = L"X";
+    m_fullNames[DIK_C] = L"C";
+    m_fullNames[DIK_V] = L"V";
+    m_fullNames[DIK_B] = L"B";
+    m_fullNames[DIK_N] = L"N";
+    m_fullNames[DIK_M] = L"M";
+    m_fullNames[DIK_COMMA] = L",";
+    m_fullNames[DIK_PERIOD] = L".";
+    m_fullNames[DIK_SLASH] = L"/";
+    m_fullNames[DIK_RSHIFT] = L"Right Shift";
+    m_fullNames[DIK_MULTIPLY] = L"Numpad *";
+    m_fullNames[DIK_LMENU] = L"Left Alt";
+    m_fullNames[DIK_SPACE] = L"Space";
+    m_fullNames[DIK_CAPITAL] = L"Caps Lock";
+    m_fullNames[DIK_F1] = L"F1";
+    m_fullNames[DIK_F2] = L"F2";
+    m_fullNames[DIK_F3] = L"F3";
+    m_fullNames[DIK_F4] = L"F4";
+    m_fullNames[DIK_F5] = L"F5";
+    m_fullNames[DIK_F6] = L"F6";
+    m_fullNames[DIK_F7] = L"F7";
+    m_fullNames[DIK_F8] = L"F8";
+    m_fullNames[DIK_F9] = L"F9";
+    m_fullNames[DIK_F10] = L"F10";
+    m_fullNames[DIK_NUMLOCK] = L"Num Lock";
+    m_fullNames[DIK_SCROLL] = L"Scroll Lock";
+    m_fullNames[DIK_NUMPAD7] = L"Numpad 7";
+    m_fullNames[DIK_NUMPAD8] = L"Numpad 8";
+    m_fullNames[DIK_NUMPAD9] = L"Numpad 9";
+    m_fullNames[DIK_SUBTRACT] = L"Numpad -";
+    m_fullNames[DIK_NUMPAD4] = L"Numpad 4";
+    m_fullNames[DIK_NUMPAD5] = L"Numpad 5";
+    m_fullNames[DIK_NUMPAD6] = L"Numpad 6";
+    m_fullNames[DIK_ADD] = L"Numpad +";
+    m_fullNames[DIK_NUMPAD1] = L"Numpad 1";
+    m_fullNames[DIK_NUMPAD2] = L"Numpad 2";
+    m_fullNames[DIK_NUMPAD3] = L"Numpad 3";
+    m_fullNames[DIK_NUMPAD0] = L"Numpad 0";
+    m_fullNames[DIK_DECIMAL] = L"Numpad .";
+    m_fullNames[DIK_OEM_102] = L"<";
+    m_fullNames[DIK_F11] = L"F11";
+    m_fullNames[DIK_F12] = L"F12";
+    m_fullNames[DIK_F13] = L"F13";
+    m_fullNames[DIK_F14] = L"F14";
+    m_fullNames[DIK_F15] = L"F15";
+    m_fullNames[DIK_KANA] = L"Kana";
+    m_fullNames[DIK_ABNT_C1] = L"C1";
+    m_fullNames[DIK_CONVERT] = L"Convert";
+    m_fullNames[DIK_NOCONVERT] = L"No Convert";
+    m_fullNames[DIK_YEN] = L"Yen";
+    m_fullNames[DIK_ABNT_C2] = L"C2";
+    m_fullNames[DIK_NUMPADEQUALS] = L"Numpad =";
+    m_fullNames[0x90] = L"Previous Track";
+    m_fullNames[DIK_AT] = L"@";
+    m_fullNames[DIK_COLON] = L":";
+    m_fullNames[DIK_UNDERLINE] = L"_";
+    m_fullNames[DIK_KANJI] = L"Kanji";
+    m_fullNames[DIK_STOP] = L"Stop";
+    m_fullNames[DIK_AX] = L"AX";
+    m_fullNames[DIK_UNLABELED] = L"Unlabeled";
+    m_fullNames[DIK_NEXTTRACK] = L"Next Track";
+    m_fullNames[DIK_NUMPADENTER] = L"Numpad Enter";
+    m_fullNames[DIK_RCONTROL] = L"Right Control";
+    m_fullNames[DIK_MUTE] = L"Mute";
+    m_fullNames[DIK_CALCULATOR] = L"Calculator";
+    m_fullNames[DIK_PLAYPAUSE] = L"Play/Pause";
+    m_fullNames[DIK_MEDIASTOP] = L"Media Stop";
+    m_fullNames[DIK_VOLUMEDOWN] = L"Volume -";
+    m_fullNames[DIK_VOLUMEUP] = L"Volume +";
+    m_fullNames[DIK_WEBHOME] = L"Web Home";
+    m_fullNames[DIK_NUMPADCOMMA] = L"Numpad ,";
+    m_fullNames[DIK_DIVIDE] = L"Numpad /";
+    m_fullNames[DIK_SYSRQ] = L"SYSRQ";
+    m_fullNames[DIK_RMENU] = L"Right Alt";
+    m_fullNames[DIK_PAUSE] = L"Pause";
+    m_fullNames[DIK_HOME] = L"Home";
+    m_fullNames[DIK_UP] = L"Up Arrow";
+    m_fullNames[DIK_PRIOR] = L"Page Up";
+    m_fullNames[DIK_LEFT] = L"Left Arrow";
+    m_fullNames[DIK_RIGHT] = L"Right Arrow";
+    m_fullNames[DIK_END] = L"End";
+    m_fullNames[DIK_DOWN] = L"Down Arrow";
+    m_fullNames[DIK_NEXT] = L"Page Down";
+    m_fullNames[DIK_INSERT] = L"Insert";
+    m_fullNames[DIK_DELETE] = L"Delete";
+    m_fullNames[DIK_LWIN] = L"Windows Left";
+    m_fullNames[DIK_RWIN] = L"Windows Right";
+    m_fullNames[DIK_APPS] = L"App Menu";
+    m_fullNames[DIK_POWER] = L"System Power";
+    m_fullNames[DIK_SLEEP] = L"System Sleep";
+    m_fullNames[DIK_WAKE] = L"System Wake";
+    m_fullNames[DIK_WEBSEARCH] = L"Web Search";
+    m_fullNames[DIK_WEBFAVORITES] = L"Web Favorites";
+    m_fullNames[DIK_WEBREFRESH] = L"Web Refresh";
+    m_fullNames[DIK_WEBSTOP] = L"Web Stop";
+    m_fullNames[DIK_WEBFORWARD] = L"Web Forward";
+    m_fullNames[DIK_WEBBACK] = L"Web Back";
+    m_fullNames[DIK_MYCOMPUTER] = L"My Computer";
+    m_fullNames[DIK_MAIL] = L"Mail";
+    m_fullNames[DIK_MEDIASELECT] = L"Media Select";
+    m_abbreviations[DIK_ESCAPE] = L"ESC";
+    m_abbreviations[DIK_1] = L"1";
+    m_abbreviations[DIK_2] = L"2";
+    m_abbreviations[DIK_3] = L"3";
+    m_abbreviations[DIK_4] = L"4";
+    m_abbreviations[DIK_5] = L"5";
+    m_abbreviations[DIK_6] = L"6";
+    m_abbreviations[DIK_7] = L"7";
+    m_abbreviations[DIK_8] = L"8";
+    m_abbreviations[DIK_9] = L"9";
+    m_abbreviations[DIK_0] = L"0";
+    m_abbreviations[DIK_MINUS] = L"-";
+    m_abbreviations[DIK_EQUALS] = L"=";
+    m_abbreviations[DIK_BACK] = L"BS";
+    m_abbreviations[DIK_TAB] = L"TAB";
+    m_abbreviations[DIK_Q] = L"Q";
+    m_abbreviations[DIK_W] = L"W";
+    m_abbreviations[DIK_E] = L"E";
+    m_abbreviations[DIK_R] = L"R";
+    m_abbreviations[DIK_T] = L"T";
+    m_abbreviations[DIK_Y] = L"Y";
+    m_abbreviations[DIK_U] = L"U";
+    m_abbreviations[DIK_I] = L"I";
+    m_abbreviations[DIK_O] = L"O";
+    m_abbreviations[DIK_P] = L"P";
+    m_abbreviations[DIK_LBRACKET] = L"[";
+    m_abbreviations[DIK_RBRACKET] = L"]";
+    m_abbreviations[DIK_RETURN] = L"RET";
+    m_abbreviations[DIK_LCONTROL] = L"LC";
+    m_abbreviations[DIK_A] = L"A";
+    m_abbreviations[DIK_S] = L"S";
+    m_abbreviations[DIK_D] = L"D";
+    m_abbreviations[DIK_F] = L"F";
+    m_abbreviations[DIK_G] = L"G";
+    m_abbreviations[DIK_H] = L"H";
+    m_abbreviations[DIK_J] = L"J";
+    m_abbreviations[DIK_K] = L"K";
+    m_abbreviations[DIK_L] = L"L";
+    m_abbreviations[DIK_SEMICOLON] = L";";
+    m_abbreviations[DIK_APOSTROPHE] = L"'";
+    m_abbreviations[DIK_GRAVE] = L"`";
+    m_abbreviations[DIK_LSHIFT] = L"LS";
+    m_abbreviations[DIK_BACKSLASH] = L"\\";
+    m_abbreviations[DIK_Z] = L"Z";
+    m_abbreviations[DIK_X] = L"X";
+    m_abbreviations[DIK_C] = L"C";
+    m_abbreviations[DIK_V] = L"V";
+    m_abbreviations[DIK_B] = L"B";
+    m_abbreviations[DIK_N] = L"N";
+    m_abbreviations[DIK_M] = L"M";
+    m_abbreviations[DIK_COMMA] = L",";
+    m_abbreviations[DIK_PERIOD] = L".";
+    m_abbreviations[DIK_SLASH] = L"/";
+    m_abbreviations[DIK_RSHIFT] = L"RS";
+    m_abbreviations[DIK_MULTIPLY] = L"N*";
+    m_abbreviations[DIK_LMENU] = L"LA";
+    m_abbreviations[DIK_SPACE] = L"SP";
+    m_abbreviations[DIK_CAPITAL] = L"CL";
+    m_abbreviations[DIK_F1] = L"F1";
+    m_abbreviations[DIK_F2] = L"F2";
+    m_abbreviations[DIK_F3] = L"F3";
+    m_abbreviations[DIK_F4] = L"F4";
+    m_abbreviations[DIK_F5] = L"F5";
+    m_abbreviations[DIK_F6] = L"F6";
+    m_abbreviations[DIK_F7] = L"F7";
+    m_abbreviations[DIK_F8] = L"F8";
+    m_abbreviations[DIK_F9] = L"F9";
+    m_abbreviations[DIK_F10] = L"F10";
+    m_abbreviations[DIK_NUMLOCK] = L"NL";
+    m_abbreviations[DIK_SCROLL] = L"SL";
+    m_abbreviations[DIK_NUMPAD7] = L"N7";
+    m_abbreviations[DIK_NUMPAD8] = L"N8";
+    m_abbreviations[DIK_NUMPAD9] = L"N9";
+    m_abbreviations[DIK_SUBTRACT] = L"N-";
+    m_abbreviations[DIK_NUMPAD4] = L"N4";
+    m_abbreviations[DIK_NUMPAD5] = L"N5";
+    m_abbreviations[DIK_NUMPAD6] = L"N6";
+    m_abbreviations[DIK_ADD] = L"N+";
+    m_abbreviations[DIK_NUMPAD1] = L"N1";
+    m_abbreviations[DIK_NUMPAD2] = L"N2";
+    m_abbreviations[DIK_NUMPAD3] = L"N3";
+    m_abbreviations[DIK_NUMPAD0] = L"N0";
+    m_abbreviations[DIK_DECIMAL] = L"N.";
+    m_abbreviations[DIK_OEM_102] = L"<";
+    m_abbreviations[DIK_F11] = L"F11";
+    m_abbreviations[DIK_F12] = L"F12";
+    m_abbreviations[DIK_F13] = L"F13";
+    m_abbreviations[DIK_F14] = L"F14";
+    m_abbreviations[DIK_F15] = L"F15";
+    m_abbreviations[DIK_KANA] = L"KN";
+    m_abbreviations[DIK_ABNT_C1] = L"C1";
+    m_abbreviations[DIK_CONVERT] = L"CON";
+    m_abbreviations[DIK_NOCONVERT] = L"NCON";
+    m_abbreviations[DIK_YEN] = L"YEN";
+    m_abbreviations[DIK_ABNT_C2] = L"C2";
+    m_abbreviations[DIK_NUMPADEQUALS] = L"N=";
+    m_abbreviations[0x90] = L"PT";
+    m_abbreviations[DIK_AT] = L"@";
+    m_abbreviations[DIK_COLON] = L":";
+    m_abbreviations[DIK_UNDERLINE] = L"_";
+    m_abbreviations[DIK_KANJI] = L"KJ";
+    m_abbreviations[DIK_STOP] = L"ST";
+    m_abbreviations[DIK_AX] = L"AX";
+    m_abbreviations[DIK_UNLABELED] = L"UL";
+    m_abbreviations[DIK_NEXTTRACK] = L"NT";
+    m_abbreviations[DIK_NUMPADENTER] = L"NE";
+    m_abbreviations[DIK_RCONTROL] = L"RC";
+    m_abbreviations[DIK_MUTE] = L"MUT";
+    m_abbreviations[DIK_CALCULATOR] = L"CAL";
+    m_abbreviations[DIK_PLAYPAUSE] = L"PP";
+    m_abbreviations[DIK_MEDIASTOP] = L"MS";
+    m_abbreviations[DIK_VOLUMEDOWN] = L"V-";
+    m_abbreviations[DIK_VOLUMEUP] = L"V+";
+    m_abbreviations[DIK_WEBHOME] = L"WH";
+    m_abbreviations[DIK_NUMPADCOMMA] = L"N,";
+    m_abbreviations[DIK_DIVIDE] = L"N/";
+    m_abbreviations[DIK_SYSRQ] = L"SRQ";
+    m_abbreviations[DIK_RMENU] = L"RA";
+    m_abbreviations[DIK_PAUSE] = L"PAU";
+    m_abbreviations[DIK_HOME] = L"HOM";
+    m_abbreviations[DIK_UP] = L"UA";
+    m_abbreviations[DIK_PRIOR] = L"PGU";
+    m_abbreviations[DIK_LEFT] = L"LA";
+    m_abbreviations[DIK_RIGHT] = L"RA";
+    m_abbreviations[DIK_END] = L"END";
+    m_abbreviations[DIK_DOWN] = L"DA";
+    m_abbreviations[DIK_NEXT] = L"PGD";
+    m_abbreviations[DIK_INSERT] = L"INS";
+    m_abbreviations[DIK_DELETE] = L"DEL";
+    m_abbreviations[DIK_LWIN] = L"WL";
+    m_abbreviations[DIK_RWIN] = L"WR";
+    m_abbreviations[DIK_APPS] = L"AM";
+    m_abbreviations[DIK_POWER] = L"SP";
+    m_abbreviations[DIK_SLEEP] = L"SS";
+    m_abbreviations[DIK_WAKE] = L"SW";
+    m_abbreviations[DIK_WEBSEARCH] = L"WS";
+    m_abbreviations[DIK_WEBFAVORITES] = L"WF";
+    m_abbreviations[DIK_WEBREFRESH] = L"WR";
+    m_abbreviations[DIK_WEBSTOP] = L"WST";
+    m_abbreviations[DIK_WEBFORWARD] = L"WF";
+    m_abbreviations[DIK_WEBBACK] = L"WB";
+    m_abbreviations[DIK_MYCOMPUTER] = L"MC";
+    m_abbreviations[DIK_MAIL] = L"MA";
+    m_abbreviations[DIK_MEDIASELECT] = L"SEL";
+}
+
+std::wstring KeyNames::getFullName(const Controls::Button &button)
+{
+    if (button.code == 0 && button.device == Controls::DeviceKeyboard) {
+        return L"Unassigned";
+    }
+    if (button.device == Controls::DeviceMouse) {
+        std::wstringstream stream;
+        stream << L"Mouse " << button.code + 1;
+        return stream.str();
+    }
+    std::map<int, std::wstring>::iterator it = m_fullNames.find(button.code);
+    if (it == m_fullNames.end()) {
+        return L"Unknown";
+    }
+    return it->second;
+}
+
+std::wstring KeyNames::getShortName(const Controls::Button &button)
+{
+    if (button.code == 0 && button.device == Controls::DeviceKeyboard) {
+        return L"?";
+    }
+    if (button.device == Controls::DeviceMouse) {
+        std::wstringstream stream;
+        stream << L"M" << button.code + 1;
+        return stream.str();
+    }
+    std::map<int, std::wstring>::iterator it = m_abbreviations.find(button.code);
+    if (it == m_abbreviations.end()) {
+        return L"?";
+    }
+    return it->second;
+}
+
+}

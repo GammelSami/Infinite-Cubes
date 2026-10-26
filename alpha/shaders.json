@@ -1,0 +1,140 @@
+{
+  "compiler": "Microsoft (R) HLSL Shader Compiler 9.30.9200.16384",
+  "shaders": [
+    {
+      "source": "src/cube/shaders/WorldVertexShader.hlsl",
+      "target": "vs_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "cube/shaders/WorldVertexShader.h",
+      "array": "worldVertexShader",
+      "role": "CubeShader m_vertexShader"
+    },
+    {
+      "source": "src/cube/shaders/WorldPixelShader.hlsl",
+      "target": "ps_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "cube/shaders/WorldPixelShader.h",
+      "array": "worldPixelShader",
+      "role": "CubeShader m_pixelShader (bind)"
+    },
+    {
+      "source": "src/cube/shaders/SkyPixelShader.hlsl",
+      "target": "ps_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "cube/shaders/SkyPixelShader.h",
+      "array": "skyPixelShader",
+      "role": "CubeShader m_skyPixelShader (bindSkyShader)"
+    },
+    {
+      "source": "src/cube/shaders/CloudPixelShader.hlsl",
+      "target": "ps_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "cube/shaders/CloudPixelShader.h",
+      "array": "cloudPixelShader",
+      "role": "CubeShader m_cloudPixelShader (bindCloudShader)"
+    },
+    {
+      "source": "src/cube/shaders/WaterPixelShader.hlsl",
+      "target": "ps_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "cube/shaders/WaterPixelShader.h",
+      "array": "waterPixelShader",
+      "role": "CubeShader m_waterPixelShader (bindWaterShader)"
+    },
+    {
+      "source": "src/cube/shaders/UnusedPixelShader.hlsl",
+      "target": "ps_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "cube/shaders/UnusedPixelShader.h",
+      "array": "unusedPixelShader",
+      "role": "CubeShader m_unusedPixelShader (never bound)"
+    },
+    {
+      "source": "plasma/src/plasma/shaders/ShapeVertexShader.hlsl",
+      "target": "vs_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "plasma/shaders/ShapeVertexShader.h",
+      "array": "shapeVertexShader",
+      "role": "D3D9Engine m_shapeVertexShader"
+    },
+    {
+      "source": "plasma/src/plasma/shaders/ShapePixelShader.hlsl",
+      "target": "ps_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "plasma/shaders/ShapePixelShader.h",
+      "array": "shapePixelShader",
+      "role": "D3D9Engine m_shapePixelShader"
+    },
+    {
+      "source": "plasma/src/plasma/shaders/SurfaceVertexShader.hlsl",
+      "target": "vs_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "plasma/shaders/SurfaceVertexShader.h",
+      "array": "surfaceVertexShader",
+      "role": "D3D9Engine m_surfaceVertexShader"
+    },
+    {
+      "source": "plasma/src/plasma/shaders/SurfacePixelShader.hlsl",
+      "target": "ps_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "plasma/shaders/SurfacePixelShader.h",
+      "array": "surfacePixelShader",
+      "role": "D3D9Engine m_surfacePixelShader"
+    },
+    {
+      "source": "plasma/src/plasma/shaders/Downsample2PixelShader.hlsl",
+      "target": "ps_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "plasma/shaders/Downsample2PixelShader.h",
+      "array": "downsample2PixelShader",
+      "role": "D3D9Engine m_downsample2PixelShader"
+    },
+    {
+      "source": "plasma/src/plasma/shaders/Downsample3PixelShader.hlsl",
+      "target": "ps_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "plasma/shaders/Downsample3PixelShader.h",
+      "array": "downsample3PixelShader",
+      "role": "D3D9Engine m_downsample3PixelShader"
+    },
+    {
+      "source": "plasma/src/plasma/shaders/Downsample4PixelShader.hlsl",
+      "target": "ps_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "plasma/shaders/Downsample4PixelShader.h",
+      "array": "downsample4PixelShader",
+      "role": "D3D9Engine m_downsample4PixelShader"
+    },
+    {
+      "source": "plasma/src/plasma/shaders/VerticalBlurPixelShader.hlsl",
+      "target": "ps_2_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "plasma/shaders/VerticalBlurPixelShader.h",
+      "array": "verticalBlurPixelShader",
+      "role": "D3D9Engine m_verticalBlurPixelShader"
+    },
+    {
+      "source": "plasma/src/plasma/shaders/HorizontalBlurPixelShader.hlsl",
+      "target": "ps_3_0",
+      "entry": "main",
+      "flags": 0,
+      "header": "plasma/shaders/HorizontalBlurPixelShader.h",
+      "array": "horizontalBlurPixelShader",
+      "role": "D3D9Engine m_horizontalBlurPixelShader"
+    }
+  ]
+}
