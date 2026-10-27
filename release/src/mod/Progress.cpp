@@ -1,4 +1,5 @@
 #include "mod/Progress.h"
+#include "mod/Cheats.h"
 #include "mod/ClassData.h"
 #include "cube/BytesIO.h"
 #include "cube/Creature.h"
@@ -98,7 +99,14 @@ int abilityPoints(cube::Creature *creature, int ability)
         data->skillForAbility(creature->m_entityData.classType, creature->m_entityData.specialization, ability);
     if (!skill)
         return -1;
-    return creature->m_playerData->modProgress.pointsOf(skill->id);
+    return effectivePoints(creature->m_playerData->modProgress, *skill);
+}
+
+int effectivePoints(const Progress &progress, const Skill &skill)
+{
+    if (cheats().allSkills)
+        return skill.maxPoints > 0 ? skill.maxPoints : AllSkillsPoints;
+    return progress.pointsOf(skill.id);
 }
 
 int maxExperience(int level)

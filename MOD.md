@@ -48,6 +48,9 @@ tools/import-alpha-assets.py ~/Downloads/cubeworld-20130624.zip ~/Games/Infinite
 ~/Games/InfiniteCubes/launch.sh editor   # Skill-Editor im Browser, wirkt sofort im laufenden Spiel
 ```
 
+Im Spiel listet der Chatbefehl `/help` die Testbefehle: `/time day|night|10:00` (nur der Host), `/skills all|off`,
+`/cooldowns off|on`, `/level n`, `/xp n`, `/gold n`, `/heal`. `/skills` und `/cooldowns` gelten bis zum Spielende.
+
 Für Tests: `CUBE_MOD_TEST_POINTS=n` gibt einer Figur ohne Punkte n Punkte in jedem Klassen-Skill,
 `CUBE_MOD_TEST_LEVEL=n` hebt ihr Alpha-Level auf n.
 

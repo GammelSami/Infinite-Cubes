@@ -20,6 +20,7 @@
 #include "cube/Zone.h"
 #include "cube/CreatureIds.h"
 #include "cube/ServerUpdateIds.h"
+#include "mod/Cheats.h"
 #include "plasma/EditFilter.h"
 
 namespace cube {
@@ -438,6 +439,15 @@ void Host::receive(const CSteamID &sender, BytesIO &packet)
                 std::vector<uint16_t> units(length);
                 packet.read(units.data(), length * 2);
                 std::wstring text = plasma::fromUtf16(units.data(), length);
+                // The mod's commands for the host (/time), answered to their sender only.
+                std::wstring reply;
+                if (mod::hostCommand(m_world, text, sender == g_localSteamId, reply)) {
+                    ChatMessage message;
+                    message.text = reply;
+                    message.creatureId = -1;
+                    connection->m_chatMessages.push_back(message);
+                    break;
+                }
                 for (std::pair<const CSteamID, Connection *> &entry : m_connections) {
                     ChatMessage message;
                     message.text = text;

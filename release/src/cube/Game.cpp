@@ -72,6 +72,7 @@
 #include "cube/SpriteIds.h"
 
 #include "cube/InterfaceIds.h"
+#include "mod/Cheats.h"
 #include "mod/ClassData.h"
 #include "mod/Hooks.h"
 #include "mod/AlphaHud.h"
@@ -1627,7 +1628,8 @@ void Game::handleButtonUp(int button)
 
 // F1 help, F2/F3 interface scale down/up (x1.25, between 1.25^-4 and 1.25^5), F4 the whole interface, F5/F6 map scale
 // (x1.1, between 1.1^-3 and 1.1^3), Escape the system menu; Return opens the chat line or sends it. The chat commands
-// /check, /namepet <name>, /sit, /wave, /pet and /dance are handled here; anything else is queued for the host.
+// /check, /namepet <name>, /sit, /wave, /pet and /dance are handled here, the mod's commands in mod::chatCommand;
+// anything else is queued for the host.
 void Game::handleKeyDown(unsigned char key)
 {
     m_keyStates[key] = true;
@@ -1677,7 +1679,8 @@ void Game::handleKeyDown(unsigned char key)
                     std::wstringstream stream(m_interface.m_inGame.m_chatWidget->m_typeboxText);
                     std::wstring command;
                     stream >> command;
-                    if (command == L"/check") {
+                    if (mod::chatCommand(this, m_interface.m_inGame.m_chatWidget->m_typeboxText)) {
+                    } else if (command == L"/check") {
                         m_interface.m_inGame.m_multiplayerWidget->m_checkGame =
                             !m_interface.m_inGame.m_multiplayerWidget->m_checkGame;
                         m_interface.m_inGame.m_chatWidget->printMessage(

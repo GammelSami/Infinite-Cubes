@@ -9,6 +9,8 @@ class Creature;
 
 namespace mod {
 
+struct Skill;
+
 // A character's alpha level, experience and skill points by skill id (PlayerData::modProgress). The release's own level
 // counts the artifacts and stays theirs. Saved after the release's character data, which the release ignores.
 struct Progress {
@@ -31,6 +33,10 @@ int totalSkillPoints(cube::Creature *player);
 // The points of the player's skill with this ability (in its class kit or the general skills); -1 when the ability is
 // not one of the player's skills, or the creature is no player with progress.
 int abilityPoints(cube::Creature *creature, int ability);
+// The points a skill works with: the character's, or under the chat command /skills all its most (maxPoints, or
+// AllSkillsPoints without a limit).
+int effectivePoints(const Progress &progress, const Skill &skill);
+const int AllSkillsPoints = 20;
 
 // The alpha's experience for the next level (50 rising towards 1050 by default), and the experience for a kill.
 int maxExperience(int level);

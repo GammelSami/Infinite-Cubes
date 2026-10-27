@@ -1,4 +1,5 @@
 #include "mod/Hooks.h"
+#include "mod/Cheats.h"
 #include "mod/ClassData.h"
 #include "mod/Progress.h"
 #include "cube/Controls.h"
@@ -26,7 +27,7 @@ const Skill *tunedSkill(cube::Creature *creature, int ability, int &points, std:
     const Skill *skill =
         data->skillForAbility(creature->m_entityData.classType, creature->m_entityData.specialization, ability);
     if (skill)
-        points = creature->m_playerData->modProgress.pointsOf(skill->id);
+        points = effectivePoints(creature->m_playerData->modProgress, *skill);
     return skill;
 }
 
@@ -154,6 +155,11 @@ bool cooldown(cube::Creature *creature, int ability, int &milliseconds)
     std::shared_ptr<const ClassData> data;
     int points = 0;
     const Skill *skill = tunedSkill(creature, ability, points, data);
+    // The chat command /cooldowns off: the player's skills are ready at once.
+    if (skill && cheats().noCooldowns) {
+        milliseconds = 0;
+        return true;
+    }
     const Value *value = skill ? skill->value("cooldown") : nullptr;
     if (!value)
         return false;
@@ -228,7 +234,7 @@ void addSkillEffects(cube::Creature *creature, int *artifactSkills, int effectCo
         const Skill *skill = data->skill(entry.skill);
         if (!skill || skill->effect < 0 || skill->effect >= effectCount)
             continue;
-        int points = creature->m_playerData->modProgress.pointsOf(skill->id);
+        int points = effectivePoints(creature->m_playerData->modProgress, *skill);
         artifactSkills[skill->effect] += (int)(points * valueOr(*skill, "artifactsPerPoint", points, 2.0f));
     }
 }
@@ -269,7 +275,7 @@ void controlBar(cube::Game *game)
         const Skill *skill = data->skill(kit->bar[i]);
         if (!skill || !skill->ability)
             continue;
-        int points = player->m_playerData->modProgress.pointsOf(skill->id);
+        int points = effectivePoints(player->m_playerData->modProgress, *skill);
         if (points <= 0 || !player->canUseSkill(skill->ability, true))
             continue;
         startSkill(game, player, *skill, points);

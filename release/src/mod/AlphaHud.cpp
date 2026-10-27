@@ -367,7 +367,7 @@ void AlphaHud::update()
     std::string icons[BarSlotCount] = {abilityIcon(abilities[0]), abilityIcon(abilities[1])};
     for (int i = BarKey1; i < BarSlotCount && kit && i - BarKey1 < (int)kit->bar.size(); i++) {
         const Skill *skill = data->skill(kit->bar[i - BarKey1]);
-        if (skill && player->m_playerData->modProgress.pointsOf(skill->id) > 0) {
+        if (skill && effectivePoints(player->m_playerData->modProgress, *skill) > 0) {
             abilities[i] = skill->ability;
             icons[i] = skill->icon;
         }
