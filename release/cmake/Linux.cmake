@@ -25,7 +25,7 @@ FetchContent_Declare(faudio
 FetchContent_MakeAvailable(faudio)
 
 list(REMOVE_ITEM GAME_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
-file(GLOB LINUX_SOURCES CONFIGURE_DEPENDS platform/linux/*.cpp)
+file(GLOB LINUX_SOURCES CONFIGURE_DEPENDS platform/linux/*.cpp platform/linux/*.c)
 add_executable(cubeworld ${GAME_SOURCES} ${LINUX_SOURCES} platform/FreeImageRuntime.cpp platform/SteamOffline.cpp)
 target_include_directories(cubeworld BEFORE PRIVATE platform/linux/include)
 target_include_directories(cubeworld PRIVATE include plasma/include thirdparty/steamworks "${DXVK_DIR}/include/dxvk")

@@ -8005,15 +8005,17 @@ void Game::updateFx(int milliseconds)
 
 void Game::updateSorting()
 {
+    // Empty stacks sort last and are cut off below. The original tested b's emptiness first, so two empty stacks each
+    // sorted before the other; MSVC's std::sort tolerates that, libstdc++'s runs past the end of the vector.
     // Equipment: items of the shown region first, then what the player can equip, then by power.
     std::sort(m_world->m_localCreature->m_inventory.m_inventoryTabs[0].begin(),
               m_world->m_localCreature->m_inventory.m_inventoryTabs[0].end(),
               [this](const ItemStack &a, const ItemStack &b) -> bool {
-                  if (b.quantity == 0) {
-                      return true;
-                  }
                   if (a.quantity == 0) {
                       return false;
+                  }
+                  if (b.quantity == 0) {
+                      return true;
                   }
                   bool aLocal = m_interface.m_inGame.m_equipmentInventoryWidget->m_region == a.item.region;
                   bool bLocal = m_interface.m_inGame.m_equipmentInventoryWidget->m_region == b.item.region;
@@ -8029,11 +8031,11 @@ void Game::updateSorting()
         std::sort(m_world->m_localCreature->m_inventory.m_inventoryTabs[i].begin(),
                   m_world->m_localCreature->m_inventory.m_inventoryTabs[i].end(),
                   [](const ItemStack &a, const ItemStack &b) -> bool {
-                      if (b.quantity == 0) {
-                          return true;
-                      }
                       if (a.quantity == 0) {
                           return false;
+                      }
+                      if (b.quantity == 0) {
+                          return true;
                       }
                       if (a.item.category < b.item.category ||
                           (a.item.category == b.item.category && a.item.id < b.item.id)) {
@@ -8045,11 +8047,11 @@ void Game::updateSorting()
     std::sort(m_world->m_localCreature->m_inventory.m_inventoryTabs[1].begin(),
               m_world->m_localCreature->m_inventory.m_inventoryTabs[1].end(),
               [this](const ItemStack &a, const ItemStack &b) -> bool {
-                  if (b.quantity == 0) {
-                      return true;
-                  }
                   if (a.quantity == 0) {
                       return false;
+                  }
+                  if (b.quantity == 0) {
+                      return true;
                   }
                   bool aLocal = m_interface.m_inGame.m_equipmentInventoryWidget->m_region == a.item.region;
                   bool bLocal = m_interface.m_inGame.m_equipmentInventoryWidget->m_region == b.item.region;

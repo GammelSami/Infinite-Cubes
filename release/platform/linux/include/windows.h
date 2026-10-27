@@ -3,6 +3,10 @@
 #include <windows_base.h>
 #include <unknwn.h>
 #include <pthread.h>
+#include <cstdlib>
+// The Windows C runtime's range for rand (platform/linux/Rand.c).
+#undef RAND_MAX
+#define RAND_MAX 0x7fff
 #include <cstdio>
 #include <cstring>
 

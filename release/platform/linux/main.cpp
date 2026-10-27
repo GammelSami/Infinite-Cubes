@@ -29,6 +29,7 @@
 #include "cube/SpriteManager.h"
 #include "cube/WorldMap.h"
 #include "FrameInput.h"
+#include "TestScript.h"
 
 cube::Game *game;
 // The device's quality levels for the options' sample count, minus one.
@@ -47,6 +48,14 @@ SDL_Gamepad *gamepad;
 // The mouse's movement since the last frame (DirectInput's relative axes).
 static float s_mouseX;
 static float s_mouseY;
+// The keyboard and mouse as the events left them (kept here so that the test script's events count too): the keys
+// held, the mouse buttons held (SDL_BUTTON_MASK) and the cursor in window coordinates.
+static bool s_keyHeld[SDL_SCANCODE_COUNT];
+static SDL_MouseButtonFlags s_buttonsHeld;
+static float s_cursorX;
+static float s_cursorY;
+// Set when the next presented frame is saved (the test script's "screenshot").
+static std::string s_screenshotRequest;
 // Current options; draw adopts Game's copy when it changes.
 static cube::Options s_options;
 // "log_startup.txt": every step of the start-up is written to it.
@@ -428,9 +437,8 @@ void draw()
     std::chrono::duration<double> elapsed = now - last;
     last = now;
     game->update(elapsed.count() * 1000.0);
-    if (SDL_GetWindowFlags(sdlWindow) & SDL_WINDOW_INPUT_FOCUS) {
-        s_options.fullscreen = (SDL_GetWindowFlags(sdlWindow) & SDL_WINDOW_FULLSCREEN) != 0;
-    }
+    // Unlike src/main.cpp, s_options.fullscreen stays the state last requested: not every compositor reports full
+    // screen in the window flags, and reading them would rebuild the buffers every frame.
     if (game->m_options.resolutionX != s_options.resolutionX || game->m_options.resolutionY != s_options.resolutionY ||
         game->m_options.refreshRate != s_options.refreshRate || game->m_options.fullscreen != s_options.fullscreen ||
         game->m_options.antiAliasing != s_options.antiAliasing || game->m_options.vsync != s_options.vsync) {
@@ -450,6 +458,10 @@ void draw()
     static int screenshotFrame = getenv("CUBE_SCREENSHOT_FRAME") ? atoi(getenv("CUBE_SCREENSHOT_FRAME")) : 300;
     if (screenshot && --screenshotFrame == 0) {
         saveScreenshot(screenshot);
+    }
+    if (!s_screenshotRequest.empty()) {
+        saveScreenshot(s_screenshotRequest.c_str());
+        s_screenshotRequest.clear();
     }
     swapChain->Present(s_options.vsync != 0, 0);
 }
@@ -571,6 +583,9 @@ static bool handleEvent(const SDL_Event &event)
         break;
     case SDL_EVENT_KEY_DOWN:
     case SDL_EVENT_KEY_UP: {
+        if (event.key.scancode < SDL_SCANCODE_COUNT) {
+            s_keyHeld[event.key.scancode] = event.type == SDL_EVENT_KEY_DOWN;
+        }
         int key = virtualKey(event.key);
         if (key == 0) {
             break;
@@ -604,9 +619,18 @@ static bool handleEvent(const SDL_Event &event)
     case SDL_EVENT_MOUSE_MOTION:
         s_mouseX += event.motion.xrel * pixelDensity();
         s_mouseY += event.motion.yrel * pixelDensity();
+        s_cursorX = event.motion.x;
+        s_cursorY = event.motion.y;
         break;
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
     case SDL_EVENT_MOUSE_BUTTON_UP: {
+        if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+            s_buttonsHeld |= SDL_BUTTON_MASK(event.button.button);
+        } else {
+            s_buttonsHeld &= ~SDL_BUTTON_MASK(event.button.button);
+        }
+        s_cursorX = event.button.x;
+        s_cursorY = event.button.y;
         int button = event.button.button == SDL_BUTTON_LEFT    ? 0
                      : event.button.button == SDL_BUTTON_RIGHT ? 1
                      : event.button.button == SDL_BUTTON_MIDDLE ? 2
@@ -710,12 +734,13 @@ int main(int argc, char **argv)
         return 1;
     }
     s_startupLog << "initialize audio" << std::endl;
-    cube::XAudio2Engine audio;
-    if (!audio.initialize()) {
+    // On the heap, to be destroyed before SDL_Quit: FAudio plays through SDL.
+    cube::XAudio2Engine *audio = new cube::XAudio2Engine;
+    if (!audio->initialize()) {
         s_startupLog << "failed" << std::endl;
     }
     s_startupLog << "done" << std::endl;
-    audio.setMusicVolume(s_options.musicVolume * 0.01f, 0.0f);
+    audio->setMusicVolume(s_options.musicVolume * 0.01f, 0.0f);
     s_startupLog << "create save dir" << std::endl;
     _mkdir("Save");
     s_startupLog << "create graphics" << std::endl;
@@ -733,7 +758,7 @@ int main(int argc, char **argv)
     for (std::map<std::array<int, 2>, std::set<int>>::iterator it = modes.begin(); it != modes.end(); ++it) {
         resolutions.push_back(*it);
     }
-    game = new cube::Game(world, worldMap, renderer, engine, &audio, &s_options, &resolutions);
+    game = new cube::Game(world, worldMap, renderer, engine, audio, &s_options, &resolutions);
     s_startupLog << "OK" << std::endl;
     SDL_HideCursor();
     SDL_StartTextInput(sdlWindow);
@@ -744,8 +769,12 @@ int main(int argc, char **argv)
     DIMOUSESTATE previousMouseState;
     ZeroMemory(&previousMouseState, sizeof(DIMOUSESTATE));
     s_startupLog << "START" << std::endl;
+    TestScript *testScript = getenv("CUBE_TEST_SCRIPT") ? new TestScript(getenv("CUBE_TEST_SCRIPT")) : nullptr;
     bool running = true;
     while (running && !game->m_shutdown) {
+        if (testScript && !testScript->step(sdlWindow, s_screenshotRequest)) {
+            running = false;
+        }
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             if (!handleEvent(event)) {
@@ -755,7 +784,8 @@ int main(int argc, char **argv)
         if (!running) {
             break;
         }
-        if (SDL_GetWindowFlags(sdlWindow) & SDL_WINDOW_INPUT_FOCUS) {
+        // A test script's input counts whether or not the window has the focus.
+        if ((SDL_GetWindowFlags(sdlWindow) & SDL_WINDOW_INPUT_FOCUS) || testScript) {
             // In the menus the system cursor is the pointer; in the game the mouse moves relatively.
             if (game->m_interface.isInMenu()) {
                 if (!cursorInMenu) {
@@ -769,16 +799,14 @@ int main(int argc, char **argv)
             }
             unsigned char keys[256];
             ZeroMemory(keys, sizeof(keys));
-            int keyCount = 0;
-            const bool *keyboard = SDL_GetKeyboardState(&keyCount);
-            for (int scancode = 0; scancode < keyCount && scancode < SDL_SCANCODE_COUNT; scancode++) {
-                if (keyboard[scancode] && s_dikByScancode[scancode]) {
+            for (int scancode = 0; scancode < SDL_SCANCODE_COUNT; scancode++) {
+                if (s_keyHeld[scancode] && s_dikByScancode[scancode]) {
                     keys[s_dikByScancode[scancode]] = 0x80;
                 }
             }
-            float cursorX = 0.0f;
-            float cursorY = 0.0f;
-            SDL_MouseButtonFlags mouseButtons = SDL_GetMouseState(&cursorX, &cursorY);
+            float cursorX = s_cursorX;
+            float cursorY = s_cursorY;
+            SDL_MouseButtonFlags mouseButtons = s_buttonsHeld;
             DIMOUSESTATE mouseState;
             ZeroMemory(&mouseState, sizeof(mouseState));
             mouseState.lX = (LONG)s_mouseX;
@@ -813,8 +841,9 @@ int main(int argc, char **argv)
     }
     SDL_SetWindowRelativeMouseMode(sdlWindow, false);
     delete game;
-    std::cout << "delete renderer" << std::endl;
-    delete renderer;
+    // Not deleted: its D3D11Shader releases m_vertexShader twice (as the original does), which DXVK does not survive.
+    // The process ends right after.
+    (void)renderer;
     std::cout << "delete world map" << std::endl;
     delete worldMap;
     std::cout << "delete world" << std::endl;
@@ -828,6 +857,7 @@ int main(int argc, char **argv)
     swapChain->Release();
     device->Release();
     deviceContext->Release();
+    delete audio;
     SteamAPI_Shutdown();
     SDL_DestroyWindow(sdlWindow);
     SDL_Quit();
