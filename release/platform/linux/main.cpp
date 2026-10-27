@@ -234,17 +234,42 @@ static int virtualKey(const SDL_KeyboardEvent &key)
     return 0;
 }
 
-// The pixels of the window per SDL window coordinate.
+// The pixels of the window per SDL window coordinate, for the mouse's movement.
 static float pixelDensity()
 {
     float density = SDL_GetWindowPixelDensity(sdlWindow);
     return density > 0.0f ? density : 1.0f;
 }
 
+// The back buffer's size: the resolution in full screen, as in src/main.cpp, otherwise the window's size in pixels.
+static void backBufferSize(int &width, int &height)
+{
+    if (s_options.fullscreen) {
+        width = s_options.resolutionX;
+        height = s_options.resolutionY;
+    } else {
+        SDL_GetWindowSizeInPixels(sdlWindow, &width, &height);
+    }
+}
+
+// The back buffer's pixels per SDL window coordinate, for the cursor's position.
+static void pointerScale(float &x, float &y)
+{
+    int bufferWidth = 0;
+    int bufferHeight = 0;
+    backBufferSize(bufferWidth, bufferHeight);
+    int windowWidth = 0;
+    int windowHeight = 0;
+    SDL_GetWindowSize(sdlWindow, &windowWidth, &windowHeight);
+    x = windowWidth > 0 && bufferWidth > 0 ? (float)bufferWidth / windowWidth : 1.0f;
+    y = windowHeight > 0 && bufferHeight > 0 ? (float)bufferHeight / windowHeight : 1.0f;
+}
+
 void setPointerInClient(int x, int y)
 {
-    float density = pixelDensity();
-    SDL_WarpMouseInWindow(sdlWindow, x / density, y / density);
+    float scaleX, scaleY;
+    pointerScale(scaleX, scaleY);
+    SDL_WarpMouseInWindow(sdlWindow, x / scaleX, y / scaleY);
 }
 
 DWORD XInputGetState(DWORD userIndex, XINPUT_STATE *state)
@@ -288,8 +313,8 @@ DWORD XInputGetState(DWORD userIndex, XINPUT_STATE *state)
     return ERROR_SUCCESS;
 }
 
-// Rebuilds the back buffer's views and the depth buffer for the window's size in pixels and tells the engine and the
-// game. Its argument is not used (callers pass 0).
+// Rebuilds the back buffer's views and the depth buffer for backBufferSize and tells the engine and the game. Its
+// argument is not used (callers pass 0).
 void resize(int unused)
 {
     if (!deviceContext) {
@@ -297,7 +322,7 @@ void resize(int unused)
     }
     int width = 0;
     int height = 0;
-    SDL_GetWindowSizeInPixels(sdlWindow, &width, &height);
+    backBufferSize(width, height);
     if (width <= 0 || height <= 0) {
         return;
     }
@@ -422,6 +447,23 @@ static void saveScreenshot(const char *fileName)
     backBuffer->Release();
 }
 
+// Puts the window into the state s_options asks for: windowed at the resolution, or borderless full screen, where the
+// back buffer keeps the resolution and is stretched to the screen (Wayland compositors do not switch display modes).
+void applyDisplayOptions()
+{
+    if (s_options.fullscreen) {
+        SDL_SetWindowFullscreenMode(sdlWindow, nullptr);
+        SDL_SetWindowFullscreen(sdlWindow, true);
+    } else {
+        SDL_SetWindowFullscreen(sdlWindow, false);
+        // Only once out of full screen: before, the window manager restores the old size afterwards.
+        SDL_SyncWindow(sdlWindow);
+        SDL_SetWindowSize(sdlWindow, s_options.resolutionX, s_options.resolutionY);
+        SDL_SetWindowPosition(sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    }
+    SDL_SyncWindow(sdlWindow);
+}
+
 // One frame: clears the buffers, runs the game for the time since the previous frame, follows the game's display
 // options, waits out the minimum time step and presents.
 void draw()
@@ -443,11 +485,7 @@ void draw()
         game->m_options.refreshRate != s_options.refreshRate || game->m_options.fullscreen != s_options.fullscreen ||
         game->m_options.antiAliasing != s_options.antiAliasing || game->m_options.vsync != s_options.vsync) {
         s_options = game->m_options;
-        if (!s_options.fullscreen) {
-            SDL_SetWindowSize(sdlWindow, s_options.resolutionX, s_options.resolutionY);
-        }
-        SDL_SetWindowFullscreen(sdlWindow, s_options.fullscreen != 0);
-        SDL_SyncWindow(sdlWindow);
+        applyDisplayOptions();
         resize(0);
     }
     DWORD frameTime = timeGetTime() - start;
@@ -473,7 +511,7 @@ bool initDirect3D()
     ZeroMemory(&bufferDesc, sizeof(DXGI_MODE_DESC));
     int width = 0;
     int height = 0;
-    SDL_GetWindowSizeInPixels(sdlWindow, &width, &height);
+    backBufferSize(width, height);
     bufferDesc.Width = width;
     bufferDesc.Height = height;
     bufferDesc.RefreshRate.Numerator = s_options.refreshRate;
@@ -720,13 +758,14 @@ int main(int argc, char **argv)
         s_options.refreshRate = desktop ? (int)std::lround(desktop->refresh_rate) : 60;
     }
     s_startupLog << "create main window" << std::endl;
-    // Windowed at first, as on Windows: the first frame switches to the options' full-screen state.
-    sdlWindow = SDL_CreateWindow("Cube World", std::min(s_options.resolutionX, 1920),
-                                 std::min(s_options.resolutionY, 1080), SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+    sdlWindow = SDL_CreateWindow("Cube World", s_options.resolutionX, s_options.resolutionY,
+                                 SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
     if (!sdlWindow) {
         std::cout << "SDL_CreateWindow failed: " << SDL_GetError() << std::endl;
         return 1;
     }
+    // Before the swap chain, which takes the window's size.
+    applyDisplayOptions();
     s_startupLog << "initialize graphics" << std::endl;
     if (!initDirect3D()) {
         s_startupLog << "failed" << std::endl;
@@ -823,8 +862,9 @@ int main(int argc, char **argv)
                 applyDeviceBindings(game, keys, mouseState);
                 // In the menus the game gets the cursor's position, in the game the mouse's movement.
                 if (game->m_interface.isInMenu()) {
-                    float density = pixelDensity();
-                    game->handleMouseMove(cursorX * density, cursorY * density);
+                    float scaleX, scaleY;
+                    pointerScale(scaleX, scaleY);
+                    game->handleMouseMove(cursorX * scaleX, cursorY * scaleY);
                 } else {
                     game->handleMouseMove((float)mouseState.lX, (float)mouseState.lY);
                 }
