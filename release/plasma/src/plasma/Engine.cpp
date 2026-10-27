@@ -1,4 +1,5 @@
 #include "plasma/Utf16.h"
+#include <cstdint>
 #include <filesystem>
 #include "plasma/Engine.h"
 #include "plasma/FileIds.h"
@@ -50,8 +51,11 @@ enum FreeImageFormat {
     FREEIMAGE_TIFF = 18
 };
 struct FIBITMAP;
+struct FIMEMORY;
 extern "C" {
-FIBITMAP *__stdcall FreeImage_LoadU(int format, const wchar_t *path, int flags);
+FIMEMORY *__stdcall FreeImage_OpenMemory(unsigned char *data, std::uint32_t size);
+FIBITMAP *__stdcall FreeImage_LoadFromMemory(int format, FIMEMORY *stream, int flags);
+void __stdcall FreeImage_CloseMemory(FIMEMORY *stream);
 unsigned __stdcall FreeImage_GetWidth(FIBITMAP *bitmap);
 unsigned __stdcall FreeImage_GetHeight(FIBITMAP *bitmap);
 unsigned __stdcall FreeImage_GetLine(FIBITMAP *bitmap);
@@ -2011,7 +2015,14 @@ Texture *Engine::loadImageTexture(const std::wstring &path)
         imageFormat = FREEIMAGE_TARGA;
     else if (imageFormat == FREEIMAGE_UNKNOWN)
         return nullptr;
-    FIBITMAP *bitmap = FreeImage_LoadU(imageFormat, path.c_str(), 0);
+    // Read through std::filesystem and decoded from memory: FreeImage_LoadU opens files on Windows only.
+    std::ifstream file(std::filesystem::path(path), std::ios::binary);
+    std::vector<unsigned char> encoded((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    if (encoded.empty())
+        return nullptr;
+    FIMEMORY *memory = FreeImage_OpenMemory(&encoded[0], (std::uint32_t)encoded.size());
+    FIBITMAP *bitmap = FreeImage_LoadFromMemory(imageFormat, memory, 0);
+    FreeImage_CloseMemory(memory);
     if (!bitmap)
         return nullptr;
     int width = FreeImage_GetWidth(bitmap);
