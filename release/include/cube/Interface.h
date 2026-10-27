@@ -112,6 +112,7 @@ struct Interface {
         plasma::Node *m_infoTextSmall;     // 12 pixels, stroke 3
         plasma::Node *m_infoTextLarge;     // 28 pixels, stroke 6
         plasma::Node *m_infoTextMedium;    // 21 pixels, stroke 5
+        plasma::Node *m_fpsText;           // 12 pixels, stroke 3, at the bottom left with Options::showFPS
         plasma::Node *m_location;          // "location"
         plasma::Node *m_levelInfo;         // "levelinfo"
         plasma::Node *m_crosshair;         // "crosshair"
@@ -215,6 +216,8 @@ struct Interface {
         m_icons; // an unnamed node without a parent holding icons.plx; the aura, ability and rarity icons are its children, setIcon instances them
     plasma::Node *m_cursor;
     plasma::Node *m_wait; // "wait"
+    unsigned int m_fpsStart = 0; // when the frames counted for m_fpsText began (timeGetTime)
+    int m_fpsFrames = 0;
     plasma::Node *m_backButton;
     plasma::Node *m_enemyIcon;              // "enemy"
     plasma::Node *m_monsterIcon;            // "monster"

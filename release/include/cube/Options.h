@@ -32,6 +32,7 @@ struct Options {
     float mapScale;          // Initially 1.0.
     int musicLoop;           // Initially 0.
     int antiAliasingSamples; // Initially 8.
+    int showFPS;             // Initially 0: the frame rate at the bottom left (Interface::update).
 };
 
 }

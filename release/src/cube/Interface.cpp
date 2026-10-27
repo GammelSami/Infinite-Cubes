@@ -274,7 +274,7 @@ void Interface::load(const std::vector<ResolutionInfo> *displayModes)
         new OptionsWidget(m_game, m_blackWidget->instance(m_game->m_engine->root()), leftButton, rightButton, button2);
     m_optionsWidget->m_resolutions = *displayModes;
     m_optionsWidget->setOptions(m_game->m_options);
-    m_optionsWidget->resizeTo(450.0f, 560.0f, true);
+    m_optionsWidget->resizeTo(450.0f, 590.0f, true); // the release's 560 and the row "Show FPS"
     m_optionsWidget->getNode()->setVisible(false);
     m_controlsWidget = new ControlsWidget(m_game, m_blackWidget->instance(m_game->m_engine->root()), button2, upButton,
                                           downButton, scrollButton);
@@ -485,6 +485,7 @@ void Interface::load(const std::vector<ResolutionInfo> *displayModes)
     m_inGame.m_infoTextSmall->setParent(m_inGame.m_node);
     m_inGame.m_infoTextLarge = createText(L"", L"info", m_inGame.m_node, (1 << plasma::TEXT_RIGHT), 28, 6);
     m_inGame.m_infoTextMedium = createText(L"", L"info", m_inGame.m_node, (1 << plasma::TEXT_RIGHT), 21, 5);
+    m_inGame.m_fpsText = createText(L"", L"fps", m_inGame.m_node, 0, 12, 3);
     m_inGame.m_location = gui->findNode(L"location");
     m_inGame.m_location->setParent(m_inGame.m_node);
     m_inGame.m_location->setIgnoresPointer(true);
@@ -909,6 +910,7 @@ void Interface::updateResolution(int width, int height)
     m_inGame.m_infoTextSmall->setPosition((float)width, 0.0f, -120.0f, 20.0f);
     m_inGame.m_infoTextLarge->setPosition((float)width, 0.0f, -120.0f, 60.0f);
     m_inGame.m_infoTextMedium->setPosition((float)width, 0.0f, -120.0f, 100.0f);
+    m_inGame.m_fpsText->setPosition(0.0f, (float)height, 10.0f, -12.0f);
     m_inGame.m_location->setPosition((float)(width / 2), (float)(height / 3), 0.0f, 0.0f);
     m_inGame.m_crosshair->setPosition((float)(width / 2), (float)(height / 2), 0.0f, 0.0f);
     m_inGame.m_zoomCrosshair->setPosition((float)(width / 2), (float)(height / 2), 0.0f, 0.0f);
@@ -1066,6 +1068,16 @@ void Interface::toggleWorldMap()
 
 void Interface::update(float step)
 {
+    // The frame rate, counted over half a second.
+    m_inGame.m_fpsText->setVisible(m_game->m_options.showFPS != 0);
+    m_fpsFrames++;
+    unsigned int now = timeGetTime();
+    if (now - m_fpsStart >= 500) {
+        if (m_fpsStart != 0)
+            m_inGame.m_fpsText->setText(std::to_wstring((m_fpsFrames * 1000 + 500) / (int)(now - m_fpsStart)) + L" FPS");
+        m_fpsStart = now;
+        m_fpsFrames = 0;
+    }
     if (m_game->isAssigningControl()) {
         m_cursor->setVisible(false);
     } else {

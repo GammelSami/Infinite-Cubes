@@ -173,6 +173,16 @@ OptionsWidget::OptionsWidget(Game *game, plasma::Node *node, plasma::Node *leftB
     m_rarityRightButton->setDisplay(rightButton->display()->clone());
     m_rarityRightButton->connectWidget(L"rightbutton", plasma::WIDGET_EVENT_POINTER_PRESSED, this,
                                        &OptionsWidget::ShowRarityIncrease, true);
+    m_showFPSLeftButton = leftButton->instance(node);
+    m_showFPSLeftButton->setTransformation(leftButton->transformation()->clone());
+    m_showFPSLeftButton->setDisplay(leftButton->display()->clone());
+    m_showFPSLeftButton->connectWidget(L"leftbutton", plasma::WIDGET_EVENT_POINTER_PRESSED, this,
+                                       &OptionsWidget::ShowFPSToggle, true);
+    m_showFPSRightButton = rightButton->instance(node);
+    m_showFPSRightButton->setTransformation(rightButton->transformation()->clone());
+    m_showFPSRightButton->setDisplay(rightButton->display()->clone());
+    m_showFPSRightButton->connectWidget(L"rightbutton", plasma::WIDGET_EVENT_POINTER_PRESSED, this,
+                                        &OptionsWidget::ShowFPSToggle, true);
     m_applyButton = button->clone(node);
     m_okButton = button->clone(node);
     m_cancelButton = button->clone(node);
@@ -325,6 +335,13 @@ void OptionsWidget::draw()
     renderText(L"Rarity", 15.0f, 446.0f);
     setTextFlags(1 << plasma::TEXT_CENTER);
     renderText(stream.str(), (getContentWidth() - 250.0f) * 0.5f + 240.0f, 446.0f);
+    stream.str(L"");
+
+    stream << (m_options.showFPS ? L"ON" : L"OFF");
+    setTextFlags(0);
+    renderText(L"Show FPS", 15.0f, 476.0f);
+    setTextFlags(1 << plasma::TEXT_CENTER);
+    renderText(stream.str(), (getContentWidth() - 250.0f) * 0.5f + 240.0f, 476.0f);
 
     // The setting button under the pointer loses its red.
     m_modeLeftButton->display()->m_fillColor = m_modeLeftButton->widget()->isPointerOver()
@@ -417,6 +434,12 @@ void OptionsWidget::draw()
     m_rarityRightButton->display()->m_fillColor = m_rarityRightButton->widget()->isPointerOver()
                                                       ? plasma::Vector<4, float>(0.0f, 1.0f, 1.0f, 1.0f)
                                                       : plasma::Vector<4, float>(1.0f, 1.0f, 1.0f, 1.0f);
+    m_showFPSLeftButton->display()->m_fillColor = m_showFPSLeftButton->widget()->isPointerOver()
+                                                      ? plasma::Vector<4, float>(0.0f, 1.0f, 1.0f, 1.0f)
+                                                      : plasma::Vector<4, float>(1.0f, 1.0f, 1.0f, 1.0f);
+    m_showFPSRightButton->display()->m_fillColor = m_showFPSRightButton->widget()->isPointerOver()
+                                                       ? plasma::Vector<4, float>(0.0f, 1.0f, 1.0f, 1.0f)
+                                                       : plasma::Vector<4, float>(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void OptionsWidget::RefreshRateDecrease()
@@ -661,6 +684,11 @@ void OptionsWidget::resized()
         plasma::Widget *button = m_rarityRightButton->widget();
         button->moveTo(viewWidth() - button->viewWidth() - 15.0f, 432.0f, true);
     }
+    m_showFPSLeftButton->widget()->moveTo(240.0f, 462.0f, true);
+    {
+        plasma::Widget *button = m_showFPSRightButton->widget();
+        button->moveTo(viewWidth() - button->viewWidth() - 15.0f, 462.0f, true);
+    }
     // Apply, OK and Cancel 20 above the bottom: left, centred, right.
     {
         plasma::Widget *button = m_applyButton->widget();
@@ -737,6 +765,11 @@ void OptionsWidget::ShowRarityDecrease()
 void OptionsWidget::ShowRarityIncrease()
 {
     m_options.showRarity = !m_options.showRarity;
+}
+
+void OptionsWidget::ShowFPSToggle()
+{
+    m_options.showFPS = !m_options.showFPS;
 }
 
 void OptionsWidget::SoundVolumeDecrease()

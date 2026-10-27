@@ -28,6 +28,7 @@ Options::Options()
     mapScale = 1.0f;
     musicLoop = 0;
     antiAliasingSamples = 8;
+    showFPS = 0;
 }
 
 void Options::load()
@@ -102,6 +103,9 @@ void Options::load()
         if (key == "antiAliasingSamples") {
             file >> antiAliasingSamples;
         }
+        if (key == "showFPS") {
+            file >> showFPS;
+        }
     }
 }
 
@@ -129,6 +133,7 @@ void Options::save()
     file << "guiScale " << guiScale << std::endl;
     file << "mapScale " << mapScale << std::endl;
     file << "antiAliasingSamples " << antiAliasingSamples << std::endl;
+    file << "showFPS " << showFPS << std::endl;
 }
 
 }

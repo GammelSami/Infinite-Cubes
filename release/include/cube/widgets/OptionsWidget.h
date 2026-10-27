@@ -57,6 +57,7 @@ public:
     void LanguageIncrease();
     void ShowRarityDecrease();
     void ShowRarityIncrease();
+    void ShowFPSToggle();
     void Apply(); // (Game::SetOptions with m_options)
     // Game::SetOptions, then hides the widget.
     void Ok();
@@ -100,6 +101,8 @@ protected:
     plasma::Node *m_languageRightButton;
     plasma::Node *m_rarityLeftButton;
     plasma::Node *m_rarityRightButton;
+    plasma::Node *m_showFPSLeftButton;
+    plasma::Node *m_showFPSRightButton;
     // Copies of the button template.
     plasma::Node *m_applyButton;
     plasma::Node *m_okButton;
