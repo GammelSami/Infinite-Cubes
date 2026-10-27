@@ -25,15 +25,29 @@ kommt nur nach `mod/main`. Der Mod-Code ist plattformneutral: Plattformcode blei
 
 ## Ziele und Stand
 
-1. [ ] Branch, Builds (Linux, Windows MinGW), Laufzeitordner `~/Games/InfiniteCubes/mod-linux`, `launch.sh mod`
-2. [ ] Klassendaten `classes.json` mit Loader und Live-Reload
-3. [ ] Alpha-Fähigkeitsleiste: Maus links/rechts nach Waffe, Tasten 1–3 nach Klasse und Spezialisierung
-4. [ ] Fortschritt: Erfahrung aus Kämpfen, Level, Skillpunkte (2 je Level, 1 je 4 Manawürfel), gespeichert pro Figur
-5. [ ] Alpha-HUD: Lebens-, Mana-, Erfahrungsbalken, Fähigkeitsleiste mit Icons und Abklingzeit
-6. [ ] Alpha-Skillmenü (X): Klassen-Skills (Kette: 5 Punkte im vorigen) und allgemeine Skills
-7. [ ] Alpha-Tasten und Bewegung: R reden, E aufheben, T Haustier, G Gleiter/Boot, Strg klettern, Shift zielen,
-       Bewegungs-Skills (Klettern, Schwimmen, Gleiten, Reiten, Zähmen) nach Skillstufe
-8. [ ] Weboberfläche: Skills Klassen zuordnen und duplizieren, Werte live ändern
+1. [x] Branch, Builds (Linux, Windows MinGW), Laufzeitordner `~/Games/InfiniteCubes/mod-linux`, `launch.sh mod`
+2. [x] Klassendaten `classes.json` mit Loader und Live-Reload
+3. [x] Alpha-Fähigkeitsleiste: Maus links/rechts nach Waffe (die Release-Angriffe), Tasten 1–3 nach Klasse und
+       Spezialisierung; Shift-Klassenskill, R-Ultimate und Ausweich-Skills der Release sind aus
+4. [x] Fortschritt: Alpha-Level und Erfahrung aus Kämpfen (eigener Wert, das Release-Level zählt weiter die Artefakte),
+       Skillpunkte (2 je Level, 1 je 4 Manawürfel), gespeichert hinter den Figurendaten
+5. [x] Alpha-HUD: Lebens-, Erfahrungs-, Manawürfelbalken oben links; HP/MP und Fähigkeitsleiste mit Icons, Abklingzeit
+6. [x] Alpha-Skillmenü (X): Spezialisierungen, Klassen-Skills (Kette), allgemeine Skills; Lernen, Zurückgeben und
+       Spezialisierung wechseln beim Klassenlehrer gegen Gold
+7. [ ] Alpha-Tasten und Bewegung: R reden, E aufheben, T Haustier, G Gleiter/Boot, Strg klettern, Shift zielen; Wirkung
+       der allgemeinen Skills (Klettern, Schwimmen, Gleiten, Reiten, Zähmen) nach Skillstufe
+8. [x] Weboberfläche: Skills Klassen zuordnen und duplizieren, Werte live ändern
+
+## Benutzen
+
+```sh
+tools/import-alpha-assets.py ~/Downloads/cubeworld-20130624.zip ~/Games/InfiniteCubes/mod-linux   # einmal
+~/Games/InfiniteCubes/launch.sh mod      # spielen
+~/Games/InfiniteCubes/launch.sh editor   # Skill-Editor im Browser, wirkt sofort im laufenden Spiel
+```
+
+Für Tests: `CUBE_MOD_TEST_POINTS=n` gibt einer Figur ohne Punkte n Punkte in jedem Klassen-Skill,
+`CUBE_MOD_TEST_LEVEL=n` hebt ihr Alpha-Level auf n.
 
 ## Alpha-Referenz
 

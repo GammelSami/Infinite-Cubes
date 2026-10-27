@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Cube World Mod – Skill-Editor</title>
+<style>
+  :root { --bg: #1d2230; --panel: #272e40; --panel2: #313a50; --line: #45506b; --text: #e8ecf4; --dim: #9aa5bd;
+          --accent: #4fd1e8; --warn: #ff6b6b; --ok: #6ee78a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.4 system-ui, sans-serif; background: var(--bg); color: var(--text); }
+  header { display: flex; align-items: center; gap: 16px; padding: 10px 16px; background: #151925; border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 17px; margin: 0; }
+  nav button { background: none; border: 0; color: var(--dim); font: inherit; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+  nav button.active { background: var(--panel2); color: var(--text); }
+  #status { margin-left: auto; font-size: 13px; color: var(--dim); }
+  #status.ok { color: var(--ok); } #status.error { color: var(--warn); }
+  main { display: grid; grid-template-columns: 1fr 320px; gap: 16px; padding: 16px; align-items: start; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .panel h2 { font-size: 15px; margin: 0 0 8px; }
+  .hint { color: var(--dim); font-size: 12px; margin: 4px 0 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .icon { width: 42px; height: 42px; image-rendering: pixelated; border-radius: 6px; background: #10131b; display: block; }
+  .icon.small { width: 28px; height: 28px; }
+  .slot { width: 52px; height: 52px; border: 2px dashed var(--line); border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+  .slot.filled { border-style: solid; }
+  .slot.over, .tree.over { border-color: var(--accent); background: rgba(79, 209, 232, .1); }
+  .slot .key { position: absolute; top: -9px; left: 4px; font-size: 11px; background: var(--panel); padding: 0 3px; color: var(--dim); }
+  .bar { display: flex; gap: 10px; margin: 10px 0 12px; }
+  .tree { border: 1px dashed transparent; border-radius: 8px; padding: 4px; min-height: 40px; }
+  .entry { display: flex; align-items: center; gap: 6px; padding: 4px; border-radius: 6px; }
+  .entry:hover { background: var(--panel2); }
+  .entry .name { flex: 1; cursor: pointer; }
+  select, input, textarea { background: #161a25; color: var(--text); border: 1px solid var(--line); border-radius: 5px; font: inherit; padding: 3px 5px; }
+  input[type=number] { width: 80px; }
+  button.small { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 5px; cursor: pointer; padding: 2px 8px; font: inherit; }
+  button.small:hover { border-color: var(--accent); }
+  button.danger:hover { border-color: var(--warn); color: var(--warn); }
+  #library { position: sticky; top: 16px; max-height: calc(100vh - 90px); overflow: auto; }
+  .lib { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; }
+  .libitem { text-align: center; font-size: 11px; padding: 4px; border-radius: 6px; cursor: grab; border: 1px solid transparent; }
+  .libitem:hover, .libitem.selected { border-color: var(--accent); background: var(--panel2); }
+  .libitem .icon { margin: 0 auto 2px; }
+  .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .55); display: none; align-items: flex-start; justify-content: center; overflow: auto; padding: 40px 0; }
+  .modal.open { display: flex; }
+  .dialog { width: 760px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .row { display: flex; gap: 10px; align-items: center; margin: 6px 0; }
+  .row label { width: 120px; color: var(--dim); }
+  .icons { display: grid; grid-template-columns: repeat(auto-fill, 34px); gap: 4px; max-height: 150px; overflow: auto; padding: 4px; background: #161a25; border-radius: 6px; }
+  .icons img { width: 30px; height: 30px; image-rendering: pixelated; cursor: pointer; border: 2px solid transparent; border-radius: 4px; }
+  .icons img.selected { border-color: var(--accent); }
+  table { border-collapse: collapse; width: 100%; margin-top: 6px; }
+  th, td { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  th { color: var(--dim); font-weight: normal; }
+  .preview { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Skill-Editor</h1>
+  <nav>
+    <button data-view="classes" class="active">Klassen</button>
+    <button data-view="progression">Fortschritt</button>
+  </nav>
+  <label><input type="checkbox" id="alphaClasses"> Alpha-Klassen aktiv</label>
+  <span id="status">lädt …</span>
+</header>
+<main>
+  <div>
+    <section id="view-classes">
+      <p class="hint">Skills aus der Bibliothek rechts auf die Leiste (Tasten 1–3) oder in den Skillbaum einer Klasse ziehen.
+        Ein Klick auf einen Skill öffnet ihn zum Bearbeiten. Jede Änderung wird sofort gespeichert; das laufende Spiel
+        übernimmt sie nach einer halben Sekunde.</p>
+      <div class="grid" id="kits"></div>
+    </section>
+    <section id="view-progression" class="hidden panel">
+      <h2>Fortschritt</h2>
+      <p class="hint">Erfahrung, Level und Skillpunkte für alle Klassen.</p>
+      <div id="progression"></div>
+    </section>
+  </div>
+  <aside class="panel" id="library">
+    <h2>Skill-Bibliothek</h2>
+    <div class="row"><input id="filter" placeholder="Suchen …" style="flex:1"><button class="small" id="newSkill">+ Neu</button></div>
+    <div class="lib" id="skills"></div>
+  </aside>
+</main>
+
+<div class="modal" id="modal"><div class="dialog" id="dialog"></div></div>
+
+<script>
+'use strict';
+let data = null, meta = { abilities: [], icons: [] }, saveTimer = null;
+const classOrder = ['Warrior', 'Ranger', 'Mage', 'Rogue'];
+const classNames = { Warrior: 'Krieger', Ranger: 'Waldläufer', Mage: 'Magier', Rogue: 'Schurke' };
+const specNames = { Berserker: 'Berserker', Guardian: 'Wächter', Sniper: 'Scharfschütze', Scout: 'Späher',
+                    Fire: 'Feuer', Water: 'Wasser', Assassin: 'Assassine', Ninja: 'Ninja' };
+// The values the game knows (classes.json "//"), with a unit for the preview.
+const valueKinds = {
+  cooldown: { label: 'Abklingzeit', unit: 's', scale: 0.001 },
+  mana: { label: 'Mana', unit: '', scale: 100 },
+  duration: { label: 'Dauer', unit: 's', scale: 0.001 },
+  strength: { label: 'Stärke', unit: '', scale: 1 },
+  speed: { label: 'Geschwindigkeit', unit: 'Bl./s', scale: 1 },
+  rise: { label: 'Höhe', unit: 'Bl./s', scale: 1 },
+};
+const progressionFields = [
+  ['skillPointsPerLevel', 'Skillpunkte je Level'], ['manaCubesPerSkillPoint', 'Manawürfel je Skillpunkt'],
+  ['killXP', 'Erfahrung je Gegner'], ['bossXPFactor', 'Faktor Boss (groß)'], ['tintedXPFactor', 'Faktor gefärbter Gegner'],
+  ['levelXPBase', 'Erfahrung für Level 2'], ['levelXPScale', 'Zuwachs bis zum Höchstwert'],
+  ['refundCost', 'Gold je zurückgegebenem Punkt (× Level)'], ['specializationCost', 'Gold für Spezialisierungswechsel (× Level)'],
+];
+
+const bonus = points => points < 1 ? 0 : 1 - 1 / (points * 0.1 + 1);
+const valueAt = (value, points) => (value.base || 0) + (value.perBonus || 0) * bonus(points);
+const element = (tag, attributes = {}, ...children) => {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attributes)) {
+    if (key.startsWith('on')) node.addEventListener(key.slice(2), value);
+    else if (key === 'class') node.className = value;
+    else node.setAttribute(key, value);
+  }
+  for (const child of children) node.append(child);
+  return node;
+};
+const iconImage = (name, small) => {
+  const image = element('img', { class: 'icon' + (small ? ' small' : ''), alt: name || '' });
+  if (name && meta.icons.includes(name)) image.src = '/icons/' + name + '.png';
+  return image;
+};
+const skillName = id => (data.skills[id] && data.skills[id].name) || id;
+
+function setStatus(text, kind) {
+  const status = document.getElementById('status');
+  status.textContent = text;
+  status.className = kind || '';
+}
+
+function save() {
+  setStatus('ungespeichert …');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      const response = await fetch('/api/data', { method: 'PUT', body: JSON.stringify(data) });
+      if (!response.ok) throw new Error((await response.json()).error || response.statusText);
+      setStatus('gespeichert ' + new Date().toLocaleTimeString(), 'ok');
+    } catch (error) {
+      setStatus('Fehler beim Speichern: ' + error.message, 'error');
+    }
+  }, 300);
+}
+
+function changed() {
+  render();
+  save();
+}
+
+// A dragged skill: its id in the transfer data.
+function draggable(node, id) {
+  node.draggable = true;
+  node.addEventListener('dragstart', event => event.dataTransfer.setData('text/skill', id));
+}
+function dropTarget(node, onDrop) {
+  node.addEventListener('dragover', event => { event.preventDefault(); node.classList.add('over'); });
+  node.addEventListener('dragleave', () => node.classList.remove('over'));
+  node.addEventListener('drop', event => {
+    event.preventDefault();
+    node.classList.remove('over');
+    const id = event.dataTransfer.getData('text/skill');
+    if (id && data.skills[id]) onDrop(id);
+  });
+}
+
+function skillSelect(selected, onChange, allowEmpty) {
+  const select = element('select', { onchange: () => onChange(select.value) });
+  if (allowEmpty) select.append(element('option', { value: '' }, '—'));
+  for (const id of Object.keys(data.skills).sort((a, b) => skillName(a).localeCompare(skillName(b))))
+    select.append(element('option', { value: id }, skillName(id)));
+  select.value = selected || '';
+  return select;
+}
+
+// A skill tree: its entries, each needing points in another, and room to drop more.
+function renderTree(tree) {
+  const box = element('div', { class: 'tree' });
+  tree.forEach((entry, index) => {
+    const requires = element('select', { onchange: () => { entry.requires = requires.value || undefined;
+      if (entry.requires && !entry.points) entry.points = 5; if (!entry.requires) delete entry.points; changed(); } });
+    requires.append(element('option', { value: '' }, 'frei'));
+    for (const other of tree) if (other !== entry) requires.append(element('option', { value: other.skill }, 'braucht ' + skillName(other.skill)));
+    requires.value = entry.requires || '';
+    const points = element('input', { type: 'number', min: 0, value: entry.points || 0, title: 'Punkte im benötigten Skill',
+      onchange: () => { entry.points = Number(points.value); changed(); } });
+    if (!entry.requires) points.disabled = true;
+    const row = element('div', { class: 'entry' },
+      iconImage(data.skills[entry.skill] && data.skills[entry.skill].icon, true),
+      element('span', { class: 'name', onclick: () => openSkill(entry.skill) }, skillName(entry.skill)),
+      requires, points,
+      element('button', { class: 'small', title: 'nach oben', onclick: () => { if (index > 0) { tree.splice(index - 1, 0, tree.splice(index, 1)[0]); changed(); } } }, '↑'),
+      element('button', { class: 'small danger', title: 'entfernen', onclick: () => { tree.splice(index, 1);
+        for (const other of tree) if (other.requires === entry.skill) { delete other.requires; delete other.points; } changed(); } }, '✕'));
+    draggable(row, entry.skill);
+    box.append(row);
+  });
+  box.append(element('div', { class: 'hint' }, 'Skill hierher ziehen, um ihn hinzuzufügen'));
+  dropTarget(box, id => { if (!tree.some(entry => entry.skill === id)) { tree.push({ skill: id }); changed(); } });
+  return box;
+}
+
+function renderKits() {
+  const kits = document.getElementById('kits');
+  kits.replaceChildren();
+  const ordered = [...data.classes].sort((a, b) => classOrder.indexOf(a.class) - classOrder.indexOf(b.class));
+  for (const kit of ordered) {
+    kit.bar = kit.bar || [];
+    kit.tree = kit.tree || [];
+    const bar = element('div', { class: 'bar' });
+    for (let i = 0; i < 3; i++) {
+      const id = kit.bar[i];
+      const slot = element('div', { class: 'slot' + (id ? ' filled' : ''), title: id ? skillName(id) + ' (Klick: bearbeiten, Rechtsklick: leeren)' : 'leer' },
+        element('span', { class: 'key' }, String(i + 1)), id ? iconImage(data.skills[id] && data.skills[id].icon) : '');
+      slot.addEventListener('click', () => id && openSkill(id));
+      slot.addEventListener('contextmenu', event => { event.preventDefault(); kit.bar[i] = ''; trimBar(kit); changed(); });
+      dropTarget(slot, dropped => {
+        while (kit.bar.length < i) kit.bar.push('');
+        kit.bar[i] = dropped;
+        // A skill on the bar belongs in the tree, where it gets its points.
+        if (!kit.tree.some(entry => entry.skill === dropped)) kit.tree.push({ skill: dropped });
+        changed();
+      });
+      bar.append(slot);
+    }
+    kits.append(element('div', { class: 'panel' },
+      element('h2', {}, (classNames[kit.class] || kit.class) + ' – ' + (specNames[kit.specialization] || kit.specialization)),
+      element('div', { class: 'hint' }, 'Leiste (Tasten 1–3)'), bar,
+      element('div', { class: 'hint' }, 'Skillbaum'), renderTree(kit.tree)));
+  }
+  data.generalSkills = data.generalSkills || [];
+  kits.append(element('div', { class: 'panel' }, element('h2', {}, 'Allgemeine Skills (alle Klassen)'),
+    element('div', { class: 'hint' }, 'Bewegung und Haustiere'), renderTree(data.generalSkills)));
+}
+
+function trimBar(kit) {
+  while (kit.bar.length && !kit.bar[kit.bar.length - 1]) kit.bar.pop();
+}
+
+function renderLibrary() {
+  const filter = document.getElementById('filter').value.toLowerCase();
+  const box = document.getElementById('skills');
+  box.replaceChildren();
+  for (const id of Object.keys(data.skills).sort((a, b) => skillName(a).localeCompare(skillName(b)))) {
+    const skill = data.skills[id];
+    if (filter && !(skill.name || id).toLowerCase().includes(filter) && !id.includes(filter)) continue;
+    const item = element('div', { class: 'libitem', title: skill.description || '', onclick: () => openSkill(id) },
+      iconImage(skill.icon), skill.name || id);
+    draggable(item, id);
+    box.append(item);
+  }
+}
+
+function renderProgression() {
+  const box = document.getElementById('progression');
+  box.replaceChildren();
+  data.progression = data.progression || {};
+  for (const [key, label] of progressionFields) {
+    const input = element('input', { type: 'number', step: 'any', value: data.progression[key] ?? '',
+      onchange: () => { data.progression[key] = Number(input.value); save(); renderXP(); } });
+    box.append(element('div', { class: 'row' }, element('label', { style: 'width:300px' }, label), input));
+  }
+  const trainer = element('input', { type: 'checkbox', onchange: () => { data.progression.requireTrainer = trainer.checked; save(); } });
+  trainer.checked = data.progression.requireTrainer !== false;
+  box.append(element('div', { class: 'row' }, element('label', { style: 'width:300px' }, 'Zurückgeben und Wechseln nur beim Klassenlehrer'), trainer));
+  box.append(element('div', { id: 'xp', class: 'hint' }));
+  renderXP();
+}
+
+function renderXP() {
+  const p = data.progression;
+  const needed = level => Math.floor((1 - 1 / ((level - 1) * 0.05 + 1)) * (p.levelXPScale ?? 1000) + (p.levelXPBase ?? 50));
+  const xp = document.getElementById('xp');
+  if (xp) xp.textContent = 'Erfahrung bis zum nächsten Level: ' +
+    [1, 2, 5, 10, 20, 50].map(level => 'Lv ' + level + ': ' + needed(level)).join(' · ');
+}
+
+function render() {
+  document.getElementById('alphaClasses').checked = data.alphaClasses !== false;
+  renderKits();
+  renderLibrary();
+  renderProgression();
+}
+
+function uniqueId(base) {
+  let id = base, n = 2;
+  while (data.skills[id]) id = base + '_' + n++;
+  return id;
+}
+
+function renameSkill(from, to) {
+  data.skills[to] = data.skills[from];
+  delete data.skills[from];
+  for (const tree of [...data.classes.map(kit => kit.tree || []), data.generalSkills || []]) {
+    for (const entry of tree) {
+      if (entry.skill === from) entry.skill = to;
+      if (entry.requires === from) entry.requires = to;
+    }
+  }
+  for (const kit of data.classes) kit.bar = (kit.bar || []).map(id => id === from ? to : id);
+}
+
+function deleteSkill(id) {
+  delete data.skills[id];
+  for (const kit of data.classes) {
+    kit.bar = (kit.bar || []).map(skill => skill === id ? '' : skill);
+    trimBar(kit);
+  }
+  for (const tree of [...data.classes.map(kit => kit.tree || []), data.generalSkills || []]) {
+    for (let i = tree.length - 1; i >= 0; i--) {
+      if (tree[i].skill === id) tree.splice(i, 1);
+      else if (tree[i].requires === id) { delete tree[i].requires; delete tree[i].points; }
+    }
+  }
+}
+
+function formatValue(kind, value) {
+  const info = valueKinds[kind] || { unit: '', scale: 1 };
+  const shown = value * info.scale;
+  return (Math.abs(shown) >= 100 ? shown.toFixed(0) : shown.toFixed(2).replace(/\.?0+$/, '')) + (info.unit ? ' ' + info.unit : '');
+}
+
+// The dialog of one skill: what it is, its icon, the ability it starts and its values with their course over the points.
+function openSkill(id) {
+  const skill = data.skills[id];
+  skill.values = skill.values || {};
+  const dialog = document.getElementById('dialog');
+  const field = (label, input) => element('div', { class: 'row' }, element('label', {}, label), input);
+  const text = (key, multiline) => {
+    const input = element(multiline ? 'textarea' : 'input', { style: 'flex:1', rows: 2,
+      oninput: () => { skill[key] = input.value; save(); renderLibrary(); renderKits(); } });
+    input.value = skill[key] || '';
+    return input;
+  };
+  const idInput = element('input', { value: id, style: 'flex:1', title: 'interner Name (Buchstaben, Ziffern, _)',
+    onchange: () => {
+      const next = idInput.value.trim().replace(/[^a-z0-9_]/gi, '_').toLowerCase();
+      if (next && next !== id && !data.skills[next]) { renameSkill(id, next); changed(); openSkill(next); }
+      else idInput.value = id;
+    } });
+  const ability = element('select', { onchange: () => { skill.ability = ability.value; save(); } });
+  ability.append(element('option', { value: '' }, '— keine (allgemeiner Skill)'));
+  for (const name of meta.abilities) ability.append(element('option', { value: name }, name));
+  ability.value = skill.ability || '';
+  const maxPoints = element('input', { type: 'number', min: 0, value: skill.maxPoints || 0, title: '0: ohne Grenze',
+    onchange: () => { if (Number(maxPoints.value) > 0) skill.maxPoints = Number(maxPoints.value); else delete skill.maxPoints; save(); } });
+  const icons = element('div', { class: 'icons' });
+  for (const name of meta.icons) {
+    const image = element('img', { src: '/icons/' + name + '.png', title: name, class: name === skill.icon ? 'selected' : '',
+      onclick: () => { skill.icon = name; save(); render(); openSkill(id); } });
+    icons.append(image);
+  }
+  const points = [0, 1, 5, 10, 20, 50];
+  const table = element('table', {}, element('tr', {}, element('th', {}, 'Wert'), element('th', {}, 'Basis'),
+    element('th', {}, 'je Bonus'), ...points.map(p => element('th', {}, p + ' P.')), element('th', {})));
+  const previews = [];
+  for (const [kind, value] of Object.entries(skill.values)) {
+    const cells = points.map(p => element('td', { class: 'preview' }, formatValue(kind, valueAt(value, p))));
+    const update = () => points.forEach((p, i) => cells[i].textContent = formatValue(kind, valueAt(value, p)));
+    const number = key => { const input = element('input', { type: 'number', step: 'any', value: value[key] ?? 0,
+      oninput: () => { value[key] = Number(input.value); update(); save(); } }); return input; };
+    previews.push(update);
+    table.append(element('tr', {}, element('td', {}, (valueKinds[kind] && valueKinds[kind].label) || kind),
+      element('td', {}, number('base')), element('td', {}, number('perBonus')), ...cells,
+      element('td', {}, element('button', { class: 'small danger', onclick: () => { delete skill.values[kind]; save(); openSkill(id); } }, '✕'))));
+  }
+  const addValue = element('select', { onchange: () => { if (addValue.value) { skill.values[addValue.value] = { base: 0, perBonus: 0 }; save(); openSkill(id); } } });
+  addValue.append(element('option', { value: '' }, '+ Wert hinzufügen …'));
+  for (const [kind, info] of Object.entries(valueKinds)) if (!(kind in skill.values)) addValue.append(element('option', { value: kind }, info.label));
+  dialog.replaceChildren(
+    element('div', { class: 'row' }, iconImage(skill.icon), element('h2', { style: 'margin:0;flex:1' }, skill.name || id),
+      element('button', { class: 'small', onclick: () => {
+        const copy = uniqueId(id);
+        data.skills[copy] = JSON.parse(JSON.stringify(skill));
+        data.skills[copy].name = (skill.name || id) + ' (Kopie)';
+        changed(); openSkill(copy); } }, 'Duplizieren'),
+      element('button', { class: 'small danger', onclick: () => { if (confirm('„' + (skill.name || id) + '“ löschen? Er verschwindet aus allen Klassen.')) { deleteSkill(id); changed(); closeDialog(); } } }, 'Löschen'),
+      element('button', { class: 'small', onclick: closeDialog }, 'Schließen')),
+    field('Name', text('name')), field('Beschreibung', text('description', true)), field('Interner Name', idInput),
+    field('Fähigkeit im Spiel', ability), field('Höchstpunkte', maxPoints),
+    element('div', { class: 'row' }, element('label', {}, 'Icon'), element('div', { style: 'flex:1' }, icons)),
+    element('h2', { style: 'margin-top:14px' }, 'Werte'),
+    element('div', { class: 'hint' }, 'Wert = Basis + je Bonus × Bonus. Der Bonus wächst mit den Punkten von 0 gegen 1 (1 Punkt: 0,09 · 5: 0,33 · 10: 0,5 · 20: 0,67). Ein Skill ohne einen Wert behält den des Spiels.'),
+    table, element('div', { class: 'row' }, addValue));
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeDialog() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+document.getElementById('modal').addEventListener('click', event => { if (event.target.id === 'modal') closeDialog(); });
+document.addEventListener('keydown', event => { if (event.key === 'Escape') closeDialog(); });
+document.getElementById('filter').addEventListener('input', renderLibrary);
+document.getElementById('alphaClasses').addEventListener('change', event => { data.alphaClasses = event.target.checked; save(); });
+document.getElementById('newSkill').addEventListener('click', () => {
+  const id = uniqueId('new_skill');
+  data.skills[id] = { name: 'Neuer Skill', ability: '', icon: 'none', description: '', values: { cooldown: { base: 10000, perBonus: -5000 } } };
+  changed(); openSkill(id);
+});
+for (const button of document.querySelectorAll('nav button')) {
+  button.addEventListener('click', () => {
+    for (const other of document.querySelectorAll('nav button')) other.classList.toggle('active', other === button);
+    for (const view of ['classes', 'progression'])
+      document.getElementById('view-' + view).classList.toggle('hidden', view !== button.dataset.view);
+  });
+}
+
+(async () => {
+  try {
+    [data, meta] = await Promise.all([fetch('/api/data').then(r => r.json()), fetch('/api/meta').then(r => r.json())]);
+    render();
+    setStatus('bereit – ' + meta.dataPath, 'ok');
+  } catch (error) {
+    setStatus('Fehler beim Laden: ' + error.message, 'error');
+  }
+})();
+</script>
+</body>
+</html>
