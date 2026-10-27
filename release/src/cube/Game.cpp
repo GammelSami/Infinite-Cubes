@@ -327,8 +327,9 @@ Game::Game(World *world, WorldMap *worldMap, gfx::D3D11Renderer *renderer, plasm
             // renderer can mesh, at most eight. Once the meshes counted so far exceed the budget of triangles for the
             // radius, only zones that already have a mesh are still considered.
             long long triangles = 0;
-            // The radius is read through std::max's reference after the lock is taken.
-            const int &budgetRadius = (std::max)(3, 30 * m_options.renderDistance / 100);
+            // The original kept std::max's reference to these temporaries and read it after the lock was taken; MSVC
+            // left the value in place, GCC does not (the budget became 0 and no new zone was ever meshed). A copy.
+            const int budgetRadius = (std::max)(3, 30 * m_options.renderDistance / 100);
             m_world->enterZoneMeshes();
             long long budget = (long long)((float)((long long)budgetRadius * budgetRadius * 98304) * 0.8f * 0.8f);
             m_world->leaveZoneMeshes();
