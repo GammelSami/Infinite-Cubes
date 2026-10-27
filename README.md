@@ -1,9 +1,18 @@
-# Cube World Alpha on Linux
+# Infinite Cubes
 
-This branch builds the **2013 Cube World Alpha** client and server as native Linux programs. It is based on [Tieczo's Linux port](https://github.com/Tieczo/Infinite-Cubes/tree/mod/alpha-linux-native) and includes higher render distances, anti-aliasing options and performance fixes.
+Infinite Cubes is a source reconstruction of Cube World. See [coremaze's project](https://github.com/coremaze/Infinite-Cubes) for the original source and its documentation. This fork is unofficial and is not affiliated with the game's creators.
 
-You need your own copy of Cube World Alpha for its game data. The game assets are not included here.
+# This Fork
 
-**[Build and set up the Linux version](alpha/platform/linux/README.md)**
+This fork brings **Cube World Alpha** and **Cube World Release** to native Linux. It also has a separate mod that brings Alpha-style classes and skills to the Release version.
 
-Looking for Cube World Release or the Alpha-style gameplay mod? [See all versions in this fork](https://github.com/GammelSami/Infinite-Cubes#pick-your-version).
+**Choose the game you have:** Alpha is the 2013 version; Release is the 2019 version. You need your own copy of the matching game for its data files. This repository contains source code, not the game assets.
+
+## Pick your version
+
+- **I want the original source:** [coremaze's project](https://github.com/coremaze/Infinite-Cubes) builds the Windows versions of Alpha and Release.
+- **I have Cube World Alpha (2013):** [`alpha-linux-port`](https://github.com/GammelSami/Infinite-Cubes/tree/alpha-linux-port) builds a native Linux client and server. It is based on [Tieczo's port](https://github.com/Tieczo/Infinite-Cubes/tree/mod/alpha-linux-native). [Build and setup instructions](https://github.com/GammelSami/Infinite-Cubes/blob/alpha-linux-port/alpha/platform/linux/README.md).
+- **I have Cube World Release (2019):** [`release-linux-port`](https://github.com/GammelSami/Infinite-Cubes/tree/release-linux-port) adds a native Linux build of version 1.0.0-1.
+- **I want Alpha-style classes in Release:** [`mod/release-alpha-gameplay`](https://github.com/GammelSami/Infinite-Cubes/tree/mod/release-alpha-gameplay) adds classes, skills, HUD and leveling to the Release Linux port. **Work in progress.**
+
+The Linux ports build native programs; they do not require Wine or Proton. There is no one-click installer.
