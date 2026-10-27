@@ -31,11 +31,13 @@ public:
     plasma::Texture *icon(const std::string &name);
     // The alpha's icon name for an ability of the game (weapon attacks and class skills).
     static std::string abilityIcon(int ability);
+    // Shows the icon (an alpha icon name) on a button of the alpha's gui.plx: the release's vector icon of icons.plx
+    // where it has one, sharp at every size, else the alpha's image; dimmed unless bright. Empty shows the empty icon.
+    void setIcon(plasma::Node *button, const std::string &name, bool bright);
     // The skill screen (key X), or nullptr without the alpha's graphics.
     SkillMenu *skillMenu() const { return m_skillMenu; }
 
 private:
-    void setIcon(plasma::Node *button, plasma::Texture *texture, bool usable);
     static void setFill(plasma::Node *fill, float fraction);
 
     cube::Interface *m_interface;
@@ -54,6 +56,11 @@ private:
     std::vector<plasma::Node *> m_abilityButtons;
     std::vector<plasma::Node *> m_cooldowns;
     std::map<std::string, plasma::Texture *> m_icons;
+    struct ShownIcon {
+        std::string name;
+        bool bright = false;
+    };
+    std::map<plasma::Node *, ShownIcon> m_shownIcons; // setIcon's last icon of each button
     SkillMenu *m_skillMenu = nullptr;
 };
 

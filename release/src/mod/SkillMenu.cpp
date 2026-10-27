@@ -82,20 +82,6 @@ std::wstring describeValue(const std::string &name, float value)
     return text.str();
 }
 
-void setButtonIcon(plasma::Node *button, plasma::Texture *texture, bool bright)
-{
-    plasma::SmoothMeshShape *shape = button ? dynamic_cast<plasma::SmoothMeshShape *>(button->m_shape) : nullptr;
-    if (!shape)
-        return;
-    int id = texture ? texture->id() : -1;
-    float saturation = bright ? 1.0f : 0.0f;
-    if (shape->m_texture.value() != id || shape->m_textureSaturation.value() != saturation) {
-        shape->m_texture.value() = id;
-        shape->m_textureSaturation.value() = saturation;
-        shape->updateDrawingTextures();
-    }
-}
-
 void setFrame(plasma::Node *button, bool hovered)
 {
     if (plasma::Node *frame = button ? button->findNode(L"frame") : nullptr)
@@ -296,8 +282,7 @@ void SkillMenu::update()
         button->setPosition(0.0f, 0.0f, left + i * 70.0f, top);
         bool hovered = button->widget() && button->widget()->isPointerOver();
         setFrame(button, hovered);
-        setButtonIcon(button, m_hud->icon(specializationIcon(player->m_entityData.classType, i)),
-                      i == m_specialization);
+        m_hud->setIcon(button, specializationIcon(player->m_entityData.classType, i), i == m_specialization);
         if (hovered)
             m_hovered = i ? "#specialization1" : "#specialization0";
     }
@@ -325,7 +310,7 @@ void SkillMenu::update()
         const Skill *skill = data->skill(entry.skill);
         bool locked = !entry.requires.empty() && pending(entry.requires) < entry.requiredPoints;
         entry.button->setText(std::to_wstring(pending(entry.skill)));
-        setButtonIcon(entry.button, skill ? m_hud->icon(skill->icon) : nullptr, !locked);
+        m_hud->setIcon(entry.button, skill ? skill->icon : "", !locked);
         bool hovered = entry.button->widget() && entry.button->widget()->isPointerOver();
         setFrame(entry.button, hovered);
         if (hovered)

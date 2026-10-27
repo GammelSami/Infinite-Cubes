@@ -110,6 +110,53 @@ plasma::SmoothMeshShape *meshShape(plasma::Node *node)
     return node ? dynamic_cast<plasma::SmoothMeshShape *>(node->m_shape) : nullptr;
 }
 
+// The release's vector icons (icons.plx) of the alpha's icon names that differ; the others have the same name.
+const std::pair<const char *, const wchar_t *> VectorIconNames[] = {
+    {"warfrenzy", L"war-frenzy"},
+    {"swiftness", L"scouts-swiftness"},
+    {"retreat2", L"retreat"},
+    {"ship-driving", L"sailing"},
+    {"pet-taming", L"pet-master"},
+    {"fireball", L"fire-ball"},
+    {"firebolt", L"fire-bolt"},
+    {"waterball", L"water-ball"},
+    {"waterbolt", L"water-bolt"},
+    {"fire-shock", L"fire-swirl"},
+    {"fire-burst", L"fire-vortex"},
+    {"water-shock", L"water-swirl"},
+    {"water-burst", L"water-vortex"},
+    {"slam", L"slam-forward"},
+    {"slam-back", L"slam-backward"},
+    {"block", L"shield-block"},
+    {"boomerang", L"throw-boomerang"},
+    {"warrior-berserker", L"specialization-berserker"},
+    {"warrior-guardian", L"specialization-guardian"},
+    {"ranger-sniper", L"specialization-sniper"},
+    {"ranger-scout", L"specialization-scout"},
+    {"mage-fire", L"specialization-fire"},
+    {"mage-water", L"specialization-water"},
+    {"rogue-assassin", L"specialization-assassin"},
+    {"rogue-ninja", L"specialization-ninja"},
+};
+
+std::wstring vectorIconName(const std::string &name)
+{
+    for (const std::pair<const char *, const wchar_t *> &entry : VectorIconNames) {
+        if (name == entry.first)
+            return entry.second;
+    }
+    return std::wstring(name.begin(), name.end());
+}
+
+// The colour every node of an icon is drawn with (a display colours its own node only).
+void tint(plasma::Node *node, const plasma::Vector<4, float> &color)
+{
+    if (node->m_display)
+        node->m_display->m_fillColor = color;
+    for (plasma::Node *child : node->m_children)
+        tint(child, color);
+}
+
 }
 
 AlphaHud::AlphaHud(cube::Interface *ui)
@@ -174,18 +221,46 @@ std::string AlphaHud::abilityIcon(int ability)
     return "";
 }
 
-void AlphaHud::setIcon(plasma::Node *button, plasma::Texture *texture, bool usable)
+void AlphaHud::setIcon(plasma::Node *button, const std::string &name, bool bright)
 {
     plasma::SmoothMeshShape *shape = meshShape(button);
     if (!shape)
         return;
-    int id = texture ? texture->id() : (icon("none") ? icon("none")->id() : -1);
-    float saturation = usable ? 1.0f : 0.0f;
+    std::string shown = name.empty() ? "none" : name;
+    plasma::Node *vector = m_interface->m_icons ? m_interface->m_icons->findNode(vectorIconName(shown)) : nullptr;
+    // A button of the same address may have replaced a destroyed one (the skill menu's): the icon child tells.
+    ShownIcon &last = m_shownIcons[button];
+    bool placed = (button->findNode(L"icon") != nullptr) == (vector != nullptr);
+    if (placed && last.name == shown && last.bright == bright)
+        return;
+    if (!placed || last.name != shown) {
+        // The vector icon replaces the button's "icon" child, drawn first so the frame, the cooldown cover and the
+        // key text stay on top; the button's own image stays empty below it.
+        if (plasma::Node *previous = button->findNode(L"icon"))
+            m_interface->m_game->m_engine->destroyNode(previous);
+        if (vector) {
+            m_interface->setIcon(button, button->getName(), vectorIconName(shown));
+            if (plasma::Node *instance = button->findNode(L"icon")) {
+                button->m_children.remove(instance);
+                button->m_children.push_front(instance);
+                instance->makeUnique();
+            }
+        }
+    }
+    plasma::Vector<4, float> color = bright ? plasma::Vector<4, float>(1.0f, 1.0f, 1.0f, 1.0f)
+                                            : plasma::Vector<4, float>(0.35f, 0.35f, 0.35f, 1.0f);
+    if (plasma::Node *instance = vector ? button->findNode(L"icon") : nullptr)
+        tint(instance, color);
+    plasma::Texture *texture = vector ? nullptr : icon(shown);
+    int id = texture ? texture->id() : -1;
+    float saturation = bright ? 1.0f : 0.0f;
     if (shape->m_texture.value() != id || shape->m_textureSaturation.value() != saturation) {
         shape->m_texture.value() = id;
         shape->m_textureSaturation.value() = saturation;
         shape->updateDrawingTextures();
     }
+    last.name = shown;
+    last.bright = bright;
 }
 
 void AlphaHud::setFill(plasma::Node *fill, float fraction)
@@ -310,7 +385,7 @@ void AlphaHud::update()
         button->setText(L"info", control < 0 ? L"4" : game->m_keyNames.getShortName(game->m_controls.buttons[control]),
                         true);
         int ability = abilities[i];
-        setIcon(button, ability ? icon(icons[i]) : nullptr, ability && player->canUseSkill(ability, true));
+        setIcon(button, ability ? icons[i] : "", ability && player->canUseSkill(ability, true));
         // The cooldown cover shrinks with the time left.
         if (plasma::Node *cooldown = m_cooldowns[i]) {
             float left = 0.0f;
