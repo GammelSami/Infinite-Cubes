@@ -1,25 +1,9 @@
-# Infinite Cubes
+# Cube World Alpha on Linux
 
-> **This fork:** Cube World Alpha as a native Linux program (no Wine; SDL3, DXVK-native, FAudio),
-> with render distance up to 200%, anti-aliasing up to 8x and the stutter fix. Branch
-> `mod/alpha-linux-native`; building and setup: [alpha/platform/linux/README.md](alpha/platform/linux/README.md).
-> You need your own copy of Cube World Alpha for its data files.
+This branch builds the **2013 Cube World Alpha** client and server as native Linux programs. It is based on [Tieczo's Linux port](https://github.com/Tieczo/Infinite-Cubes/tree/mod/alpha-linux-native) and includes higher render distances, anti-aliasing options and performance fixes.
 
-Everything you need to make Cube World your own.
+You need your own copy of Cube World Alpha for its game data. The game assets are not included here.
 
-| directory | builds |
-| --- | --- |
-| [plasma/](plasma/README.md) | plasma.exe, the Plasma vector graphics editor (x86) |
-| [alpha/](alpha/README.md) | Cube.exe and Server.exe of Cube World Alpha (x86) |
-| [release/](release/README.md) | cubeworld.exe, Cube World 1.0.0-1 (x64) |
+**[Build and set up the Linux version](alpha/platform/linux/README.md)**
 
-You MUST already own a copy of the respective software to use it, and you must
-use your own copy to provide assets for the software to work.
-
-The code provided is roughly 95% validated, and the remaining 5% may contain
-bugs not found in the original software. Open issues for these to be fixed;
-pull requests will not be accepted. Once fixed, you can pull the changes into
-your own fork.
-
-Bugs originally found in the software still exist in this source code, and
-fixing them is out of scope for this project.
+Looking for Cube World Release or the Alpha-style gameplay mod? [See all versions in this fork](https://github.com/GammelSami/Infinite-Cubes#pick-your-version).

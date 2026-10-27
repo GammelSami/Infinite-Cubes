@@ -23,7 +23,7 @@ python3 and a Vulkan driver (Arch: `sudo pacman -S --needed base-devel git cmake
 sdl3 glu python`). With your own Cube World Alpha's folder (the one with Cube.exe) as argument it
 also puts together a playable folder:
 
-    git clone https://github.com/Tieczo/Infinite-Cubes.git
+    git clone --branch alpha-linux-port https://github.com/GammelSami/Infinite-Cubes.git
     Infinite-Cubes/alpha/platform/linux/build.sh "/path/to/Cube World" ~/Games/CubeWorldAlphaLinux
     ~/Games/CubeWorldAlphaLinux/Cube
 
