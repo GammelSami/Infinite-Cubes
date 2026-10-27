@@ -1,4 +1,4 @@
-# Cube World Mod (Branch `mod/main`)
+# Cube World Mod (Branch `mod/release-alpha-gameplay`)
 
 Sams eigene Version: die Release (1.0.0-1) mit dem Klassen-Gameplay der Alpha (2013-07-20).
 
@@ -7,11 +7,11 @@ Sams eigene Version: die Release (1.0.0-1) mit dem Klassen-Gameplay der Alpha (2
 | Branch | Inhalt | Checkout |
 | --- | --- | --- |
 | `main` | Stand von coremaze (`upstream`) | – |
-| `linux-port` | Release unverändert, nur Plattform: Linux nativ, Windows (MSVC, MinGW) baut weiter | `~/Git/Infinite-Cubes` |
-| `mod/main` | dieser Mod, baut auf `linux-port` auf | `~/Git/Infinite-Cubes-mod` |
+| `release-linux-port` | Release unverändert, nur Plattform: Linux nativ, Windows (MSVC, MinGW) baut weiter | `~/Git/Infinite-Cubes` |
+| `mod/release-alpha-gameplay` | dieser Mod, baut auf `release-linux-port` auf | `~/Git/Infinite-Cubes-mod` |
 
-Plattform-Korrekturen kommen nach `linux-port` und werden von dort nach `mod/main` gemergt (`git merge linux-port`); Gameplay
-kommt nur nach `mod/main`. Der Mod-Code ist plattformneutral: Plattformcode bleibt in `release/platform/`.
+Plattform-Korrekturen kommen nach `release-linux-port` und werden von dort nach `mod/release-alpha-gameplay` gemergt (`git merge release-linux-port`); Gameplay
+kommt nur nach `mod/release-alpha-gameplay`. Der Mod-Code ist plattformneutral: Plattformcode bleibt in `release/platform/`.
 
 ## Aufbau
 
