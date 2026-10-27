@@ -236,11 +236,15 @@ void controlBar(cube::Game *game)
     if (!kit)
         return;
     // For test runs (like CUBE_TEST_SCRIPT): a character without skill points gets this many in each of its skills.
+    // CUBE_MOD_TEST_LEVEL raises a lower level to it.
     static const char *testPoints = getenv("CUBE_MOD_TEST_POINTS");
     if (testPoints && player->m_playerData->modProgress.points.empty()) {
         for (const TreeEntry &entry : kit->tree)
             player->m_playerData->modProgress.points[entry.skill] = atoi(testPoints);
     }
+    static const char *testLevel = getenv("CUBE_MOD_TEST_LEVEL");
+    if (testLevel && player->m_playerData->modProgress.level < atoi(testLevel))
+        player->m_playerData->modProgress.level = atoi(testLevel);
     static const int Keys[] = {cube::Controls::ButtonSkill1, cube::Controls::ButtonSkill2,
                                cube::Controls::ButtonSkill3};
     for (size_t i = 0; i < kit->bar.size() && i < sizeof(Keys) / sizeof(Keys[0]); i++) {

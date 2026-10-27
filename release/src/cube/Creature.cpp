@@ -5568,9 +5568,6 @@ long long Creature::maxAggroTarget()
 
 int maxExperience(int level)
 {
-    if (mod::alphaClasses()) {
-        return mod::maxExperience(level);
-    }
     return (int)(pow(2.0, (level - 1) * 0.5f) * 10.0);
 }
 

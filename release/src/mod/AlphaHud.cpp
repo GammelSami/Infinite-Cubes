@@ -1,11 +1,14 @@
 #include "mod/AlphaHud.h"
 #include "mod/ClassData.h"
 #include "mod/Progress.h"
+#include "mod/SkillMenu.h"
 #include "cube/Controls.h"
 #include "cube/Creature.h"
 #include "cube/Game.h"
 #include "cube/Interface.h"
 #include "cube/InterfaceIds.h"
+#include "cube/ServerUpdateIds.h"
+#include "cube/widgets/ChatWidget.h"
 #include "plasma/D3D11Engine.h"
 #include "plasma/Display.h"
 #include "plasma/Engine.h"
@@ -144,6 +147,7 @@ AlphaHud::AlphaHud(cube::Interface *ui)
         m_cooldowns.push_back(button->findNode(L"cooldown"));
     }
     m_available = true;
+    m_skillMenu = new SkillMenu(ui->m_game, this, parent, m_gui);
 }
 
 plasma::Texture *AlphaHud::icon(const std::string &name)
@@ -211,6 +215,8 @@ void AlphaHud::update()
     }
     for (plasma::Node *button : m_abilityButtons)
         button->setVisible(on);
+    if (m_skillMenu)
+        m_skillMenu->update();
     if (!on)
         return;
     // The release's bars and class skill give way.
@@ -234,18 +240,28 @@ void AlphaHud::update()
     std::string name(entity.name, strnlen(entity.name, sizeof(entity.name)));
     m_lifeBar->setText(L"info", std::wstring(name.begin(), name.end()), true);
     text.str(L"");
-    text << L"LVL " << entity.level << className(entity.classType);
+    mod::Progress &progress = player->m_playerData->modProgress;
+    text << L"LVL " << progress.level << className(entity.classType);
     m_lifeBar->setText(L"class", text.str(), true);
     m_lifeBar->setPosition(0.0f, 0.0f, 100.0f, 30.0f);
     setFill(m_lifeBarFill, entity.hp / player->maxHP());
 
     // The experience bar, and the mana cubes towards the next skill point.
-    int next = maxExperience(entity.level);
+    int next = maxExperience(progress.level);
     text.str(L"");
-    text << entity.xp << L"/" << next;
+    text << progress.xp << L"/" << next;
     m_experienceBar->setText(L"text", text.str(), true);
     m_experienceBar->setPosition(0.0f, 0.0f, 100.0f, 75.0f);
-    setFill(m_experienceBarFill, (float)entity.xp / (float)next);
+    setFill(m_experienceBarFill, (float)progress.xp / (float)next);
+    // A new level: the release's sound and a line in the chat, with the skill points it brings.
+    while (progress.levelUps > 0) {
+        progress.levelUps--;
+        game->playSound(cube::SoundLevelUp);
+        std::wstringstream message;
+        message << L"You reached level " << progress.level << L"! Skill points: " << skillPoints(player) << L" (X)"
+                << std::endl;
+        inGame.m_chatWidget->printMessage(message.str(), plasma::Vector<3, unsigned char>(255, 220, 128));
+    }
     if (m_manaCubeBar) {
         m_manaCubeBar->setPosition(0.0f, 0.0f, 100.0f, 130.0f);
         int perPoint = (std::max)(1, classData()->progression.manaCubesPerSkillPoint);

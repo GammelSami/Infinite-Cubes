@@ -74,6 +74,8 @@
 #include "cube/InterfaceIds.h"
 #include "mod/ClassData.h"
 #include "mod/Hooks.h"
+#include "mod/AlphaHud.h"
+#include "mod/SkillMenu.h"
 #include "plasma/EditFilter.h"
 
 namespace cube {
@@ -992,6 +994,10 @@ static bool s_musicPaused = true;
 // selects the crafting formula and the spirit cubes of the voxel widget.
 void Game::handleButtonDown(int button)
 {
+    if (m_interface.m_alphaHud && m_interface.m_alphaHud->skillMenu() &&
+        m_interface.m_alphaHud->skillMenu()->handleButtonDown(button)) {
+        return;
+    }
     m_interface.handleMouseDown(button);
     s_enchantWidgetPressed = m_interface.m_inGame.m_enchantWidget->getNode()->isVisible();
     if (m_interface.m_mapOpen) {

@@ -10,7 +10,7 @@ namespace {
 
 // Marks the mod's block after a saved character: "CMOD" and the block's version.
 const int ProgressMagic = 0x444F4D43;
-const int ProgressVersion = 1;
+const int ProgressVersion = 2; // 2 added the level and the experience
 
 }
 
@@ -32,6 +32,8 @@ void Progress::write(cube::BytesIO &stream) const
 {
     stream.write(ProgressMagic);
     stream.write(ProgressVersion);
+    stream.write(level);
+    stream.write(xp);
     stream.write((int)points.size());
     for (const std::pair<const std::string, int> &entry : points) {
         stream.write((int)entry.first.size());
@@ -42,13 +44,18 @@ void Progress::write(cube::BytesIO &stream) const
 
 void Progress::read(cube::BytesIO &stream)
 {
-    points.clear();
+    *this = Progress();
     int magic = 0;
     stream.read(magic);
     int version = 0;
     stream.read(version);
     if (magic != ProgressMagic || version < 1)
         return;
+    if (version >= 2) {
+        stream.read(level);
+        stream.read(xp);
+        level = (std::max)(1, level);
+    }
     int count = 0;
     stream.read(count);
     for (int i = 0; i < count && !stream.atEnd(); i++) {
@@ -67,7 +74,9 @@ void Progress::read(cube::BytesIO &stream)
 int totalSkillPoints(cube::Creature *player)
 {
     const Progression &progression = classData()->progression;
-    int points = (std::max)(0, player->m_entityData.level - 1) * progression.skillPointsPerLevel;
+    if (!player->m_playerData)
+        return 0;
+    int points = (std::max)(0, player->m_playerData->modProgress.level - 1) * progression.skillPointsPerLevel;
     if (progression.manaCubesPerSkillPoint > 0)
         points += player->m_inventory.m_manaCubes / progression.manaCubesPerSkillPoint;
     return points;
@@ -116,10 +125,14 @@ int killExperience(cube::Creature *victim)
 
 void addExperience(cube::Creature *player, int experience)
 {
-    player->m_entityData.xp += experience;
-    while (player->m_entityData.level > 0 && player->m_entityData.xp >= maxExperience(player->m_entityData.level)) {
-        player->m_entityData.xp -= maxExperience(player->m_entityData.level);
-        player->m_entityData.level++;
+    if (!player->m_playerData)
+        return;
+    Progress &progress = player->m_playerData->modProgress;
+    progress.xp += experience;
+    while (progress.xp >= maxExperience(progress.level)) {
+        progress.xp -= maxExperience(progress.level);
+        progress.level++;
+        progress.levelUps++;
         player->m_entityData.hp = player->maxHP();
     }
 }

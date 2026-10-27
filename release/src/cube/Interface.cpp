@@ -33,6 +33,7 @@
 #include "cube/widgets/StartMenuWidget.h"
 #include "cube/widgets/SystemWidget.h"
 #include "mod/AlphaHud.h"
+#include "mod/SkillMenu.h"
 #include "cube/widgets/VoxelWidget.h"
 #include "cube/World.h"
 #include "cube/WorldInfo.h"
@@ -822,7 +823,8 @@ bool Interface::isInMenu()
            m_inGame.m_voxelWidget->m_node->isVisible() || m_inGame.m_enchantWidget->m_node->isVisible() ||
            m_inGame.m_chatWidget->m_typeboxActive || m_inGame.m_questionWidget->m_node->isVisible() ||
            m_inGame.m_systemWidget->m_node->isVisible() || m_controlsWidget->m_node->isVisible() ||
-           m_optionsWidget->m_node->isVisible();
+           m_optionsWidget->m_node->isVisible() ||
+           (m_alphaHud && m_alphaHud->skillMenu() && m_alphaHud->skillMenu()->isOpen());
 }
 
 void Interface::lastLand()

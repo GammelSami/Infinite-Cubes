@@ -75,6 +75,9 @@ std::shared_ptr<const ClassData> parse(const nlohmann::json &root)
         progression.tintedXPFactor = p.value("tintedXPFactor", progression.tintedXPFactor);
         progression.levelXPBase = p.value("levelXPBase", progression.levelXPBase);
         progression.levelXPScale = p.value("levelXPScale", progression.levelXPScale);
+        progression.refundCost = p.value("refundCost", progression.refundCost);
+        progression.specializationCost = p.value("specializationCost", progression.specializationCost);
+        progression.requireTrainer = p.value("requireTrainer", progression.requireTrainer);
     }
     // value() returns a copy: items() of a temporary would outlive it.
     const nlohmann::json skills = root.value("skills", nlohmann::json::object());

@@ -54,6 +54,11 @@ struct Progression {
     float tintedXPFactor = 10.0f;
     float levelXPBase = 50.0f;
     float levelXPScale = 1000.0f;
+    // The class trainer's prices in gold, times the level: a skill point given back, a change of specialization.
+    int refundCost = 10;
+    int specializationCost = 100;
+    // Whether giving points back and changing the specialization need a trainer of the class nearby.
+    bool requireTrainer = true;
 };
 
 struct ClassData {

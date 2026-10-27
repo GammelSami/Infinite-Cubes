@@ -13,6 +13,8 @@ class Texture;
 
 namespace mod {
 
+class SkillMenu;
+
 // The alpha's in-game interface in place of the release's: the life bar with name, level and class, the experience and
 // mana cube bars at the top left; the hit point and mana bars and the ability bar (M1, M2, 1 to 4) at the bottom. Its
 // graphics are the alpha's (alpha/gui.plx and alpha/icons, see tools/import-alpha-assets.py); without them the
@@ -29,6 +31,8 @@ public:
     plasma::Texture *icon(const std::string &name);
     // The alpha's icon name for an ability of the game (weapon attacks and class skills).
     static std::string abilityIcon(int ability);
+    // The skill screen (key X), or nullptr without the alpha's graphics.
+    SkillMenu *skillMenu() const { return m_skillMenu; }
 
 private:
     void setIcon(plasma::Node *button, plasma::Texture *texture, bool usable);
@@ -50,6 +54,7 @@ private:
     std::vector<plasma::Node *> m_abilityButtons;
     std::vector<plasma::Node *> m_cooldowns;
     std::map<std::string, plasma::Texture *> m_icons;
+    SkillMenu *m_skillMenu = nullptr;
 };
 
 }

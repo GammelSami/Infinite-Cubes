@@ -8,7 +8,10 @@
     "bossXPFactor": 20,
     "tintedXPFactor": 10,
     "levelXPBase": 50,
-    "levelXPScale": 1000
+    "levelXPScale": 1000,
+    "refundCost": 10,
+    "specializationCost": 100,
+    "requireTrainer": true
   },
   "skills": {
     "smash": {
