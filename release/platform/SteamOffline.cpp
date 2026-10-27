@@ -5,7 +5,9 @@ class OfflineISteamUser final : public ISteamUser {
 public:
  HSteamUser GetHSteamUser() override { return {}; }
  bool BLoggedOn() override { return {}; }
- CSteamID GetSteamID() override { return CSteamID(uint64(1)); }
+ // A valid ID (CSteamID::IsValid): Client sends to the local host only while the host's ID is valid; with the raw ID 1
+ // no pickup, loot or other interaction reached it.
+ CSteamID GetSteamID() override { return CSteamID(1, k_EUniversePublic, k_EAccountTypeIndividual); }
  int InitiateGameConnection( void *pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer, bool bSecure ) override { return {}; }
  void TerminateGameConnection( uint32 unIPServer, uint16 usPortServer ) override {  }
  void TrackAppUsageEvent( CGameID gameID, int eAppUsageEvent, const char *pchExtraInfo) override {  }
