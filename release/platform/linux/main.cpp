@@ -456,10 +456,19 @@ void applyDisplayOptions()
         SDL_SetWindowFullscreen(sdlWindow, true);
     } else {
         SDL_SetWindowFullscreen(sdlWindow, false);
-        // Only once out of full screen: before, the window manager restores the old size afterwards.
+        // Sized only once out of full screen: before, the window manager restores the old size afterwards.
         SDL_SyncWindow(sdlWindow);
-        SDL_SetWindowSize(sdlWindow, s_options.resolutionX, s_options.resolutionY);
-        SDL_SetWindowPosition(sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        // A window as large as the screen is maximized instead: mutter left one of exactly the screen's size undrawn
+        // after full screen, and Present waited for it forever.
+        SDL_Rect usable;
+        if (SDL_GetDisplayUsableBounds(SDL_GetDisplayForWindow(sdlWindow), &usable) &&
+            (s_options.resolutionX >= usable.w || s_options.resolutionY >= usable.h)) {
+            SDL_MaximizeWindow(sdlWindow);
+        } else {
+            SDL_RestoreWindow(sdlWindow);
+            SDL_SetWindowSize(sdlWindow, s_options.resolutionX, s_options.resolutionY);
+            SDL_SetWindowPosition(sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        }
     }
     SDL_SyncWindow(sdlWindow);
 }
