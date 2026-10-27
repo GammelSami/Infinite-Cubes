@@ -103,7 +103,11 @@ const valueKinds = {
   strength: { label: 'Stärke', unit: '', scale: 1 },
   speed: { label: 'Geschwindigkeit', unit: 'Bl./s', scale: 1 },
   rise: { label: 'Höhe', unit: 'Bl./s', scale: 1 },
+  artifactsPerPoint: { label: 'Artefakte je Punkt', unit: '', scale: 1 },
 };
+// The release's artifact effects a general skill can strengthen (ClassData.cpp, Effects).
+const effects = { '': '— keiner', ClimbingSpeed: 'Klettern', SwimmingSpeed: 'Schwimmen', DivingStamina: 'Tauchen',
+                  RidingSpeed: 'Reiten', HangGlidingSpeed: 'Gleiten', SailingSpeed: 'Segeln', LampRadius: 'Lampe' };
 const progressionFields = [
   ['skillPointsPerLevel', 'Skillpunkte je Level'], ['manaCubesPerSkillPoint', 'Manawürfel je Skillpunkt'],
   ['killXP', 'Erfahrung je Gegner'], ['bossXPFactor', 'Faktor Boss (groß)'], ['tintedXPFactor', 'Faktor gefärbter Gegner'],
@@ -349,6 +353,12 @@ function openSkill(id) {
   ability.append(element('option', { value: '' }, '— keine (allgemeiner Skill)'));
   for (const name of meta.abilities) ability.append(element('option', { value: name }, name));
   ability.value = skill.ability || '';
+  const effect = element('select', { title: 'Bewegungs-Bonus der Release, wie ein Artefakt',
+    onchange: () => { if (effect.value) skill.effect = effect.value; else delete skill.effect;
+      if (effect.value && !skill.values.artifactsPerPoint) skill.values.artifactsPerPoint = { base: 2, perBonus: 0 };
+      save(); openSkill(id); } });
+  for (const [name, label] of Object.entries(effects)) effect.append(element('option', { value: name }, label));
+  effect.value = skill.effect || '';
   const maxPoints = element('input', { type: 'number', min: 0, value: skill.maxPoints || 0, title: '0: ohne Grenze',
     onchange: () => { if (Number(maxPoints.value) > 0) skill.maxPoints = Number(maxPoints.value); else delete skill.maxPoints; save(); } });
   const icons = element('div', { class: 'icons' });
@@ -384,7 +394,7 @@ function openSkill(id) {
       element('button', { class: 'small danger', onclick: () => { if (confirm('„' + (skill.name || id) + '“ löschen? Er verschwindet aus allen Klassen.')) { deleteSkill(id); changed(); closeDialog(); } } }, 'Löschen'),
       element('button', { class: 'small', onclick: closeDialog }, 'Schließen')),
     field('Name', text('name')), field('Beschreibung', text('description', true)), field('Interner Name', idInput),
-    field('Fähigkeit im Spiel', ability), field('Höchstpunkte', maxPoints),
+    field('Fähigkeit im Spiel', ability), field('Bewegungs-Effekt', effect), field('Höchstpunkte', maxPoints),
     element('div', { class: 'row' }, element('label', {}, 'Icon'), element('div', { style: 'flex:1' }, icons)),
     element('h2', { style: 'margin-top:14px' }, 'Werte'),
     element('div', { class: 'hint' }, 'Wert = Basis + je Bonus × Bonus. Der Bonus wächst mit den Punkten von 0 gegen 1 (1 Punkt: 0,09 · 5: 0,33 · 10: 0,5 · 20: 0,67). Ein Skill ohne einen Wert behält den des Spiels.'),

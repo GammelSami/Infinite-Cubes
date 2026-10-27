@@ -27,6 +27,19 @@ const std::pair<const char *, int> Abilities[] = {
 };
 #undef ABILITY
 
+// The release's artifact effects (cube::ArtifactEffect_*), which the general skills strengthen.
+const char *const Effects[] = {"ClimbingSpeed",    "SwimmingSpeed", "DivingStamina", "RidingSpeed",
+                               "HangGlidingSpeed", "SailingSpeed",  "LampRadius"};
+
+int effectByName(const std::string &name)
+{
+    for (int i = 0; i < (int)(sizeof(Effects) / sizeof(Effects[0])); i++) {
+        if (name == Effects[i])
+            return i;
+    }
+    return -1;
+}
+
 int classByName(const std::string &name)
 {
     if (name == "Warrior")
@@ -93,6 +106,10 @@ std::shared_ptr<const ClassData> parse(const nlohmann::json &root)
         if (!skill.abilityName.empty() && !skill.ability)
             std::cout << "mod: skill " << skill.id << ": unknown ability " << skill.abilityName << std::endl;
         skill.maxPoints = item.value("maxPoints", 0);
+        skill.effectName = item.value("effect", "");
+        skill.effect = effectByName(skill.effectName);
+        if (!skill.effectName.empty() && skill.effect < 0)
+            std::cout << "mod: skill " << skill.id << ": unknown effect " << skill.effectName << std::endl;
         const nlohmann::json values = item.value("values", nlohmann::json::object());
         for (auto &value : values.items()) {
             Value tuned;

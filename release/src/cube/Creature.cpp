@@ -7332,6 +7332,7 @@ void Creature::updateLevelAndSkills()
             }
         }
     }
+    mod::addSkillEffects(this, m_artifactSkills.data(), (int)m_artifactSkills.size());
 }
 
 // Whether a skill's cooldown is kept when the creature's abilities are reset: never.

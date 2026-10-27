@@ -15,6 +15,8 @@ bool cooldown(cube::Creature *creature, int ability, int &milliseconds);
 bool manaCost(cube::Creature *creature, int ability, float &cost);
 // World::applyBuffSkill: the alpha's buffs with the skill's "duration" and "strength" values.
 bool applyBuffSkill(cube::World *world, cube::Creature *creature, int ability);
+// Creature::updateLevelAndSkills: the general skills' points as artifacts of their effects.
+void addSkillEffects(cube::Creature *creature, int *artifactSkills, int effectCount);
 // World::onKill: the alpha's experience for the local player's kills.
 void onKill(cube::World *world, cube::Creature *killer, cube::Creature *victim);
 // Game::controlCharacter, in place of the release's class skills (Shift, R and the dodge skills): the keys 1 to 3 start

@@ -217,6 +217,22 @@ bool applyBuffSkill(cube::World *world, cube::Creature *creature, int ability)
     return true;
 }
 
+void addSkillEffects(cube::Creature *creature, int *artifactSkills, int effectCount)
+{
+    if (!creature->m_playerData)
+        return;
+    std::shared_ptr<const ClassData> data = classData();
+    if (!data->alphaClasses)
+        return;
+    for (const TreeEntry &entry : data->generalTree) {
+        const Skill *skill = data->skill(entry.skill);
+        if (!skill || skill->effect < 0 || skill->effect >= effectCount)
+            continue;
+        int points = creature->m_playerData->modProgress.pointsOf(skill->id);
+        artifactSkills[skill->effect] += (int)(points * valueOr(*skill, "artifactsPerPoint", points, 2.0f));
+    }
+}
+
 void onKill(cube::World *world, cube::Creature *killer, cube::Creature *victim)
 {
     if (!killer || !victim || killer != world->m_localCreature || !killer->m_playerData || !alphaClasses())

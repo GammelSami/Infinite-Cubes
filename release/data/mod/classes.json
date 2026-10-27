@@ -1,5 +1,5 @@
 {
-  "//": "The mod's classes (MOD.md). A value is base + perBonus * bonus, the bonus growing from 0 towards 1 with the skill's points (1 - 1 / (points / 10 + 1)). Values: cooldown (ms), mana (part of the mana bar), duration (ms), strength (Bulwark: the damage taken; Mana Shield: times the spell power; Swiftness: the speed bonus), speed and rise (blocks per second). A skill without a value keeps the game's. bar: the skills of the keys 1 to 3; tree: the skill menu, a skill needing points in another.",
+  "//": "The mod's classes (MOD.md). A value is base + perBonus * bonus, the bonus growing from 0 towards 1 with the skill's points (1 - 1 / (points / 10 + 1)). Values: cooldown (ms), mana (part of the mana bar), duration (ms), strength (Bulwark: the damage taken; Mana Shield: times the spell power; Swiftness: the speed bonus), speed and rise (blocks per second). A skill without a value keeps the game's. bar: the skills of the keys 1 to 3; tree: the skill menu, a skill needing points in another. General skills: effect names the release artifact effect they strengthen (ClimbingSpeed, SwimmingSpeed, DivingStamina, RidingSpeed, HangGlidingSpeed, SailingSpeed, LampRadius); each point counts as artifactsPerPoint artifacts (2 gives the alpha curve).",
   "alphaClasses": true,
   "progression": {
     "skillPointsPerLevel": 2,
@@ -334,43 +334,73 @@
       "name": "Pet Taming",
       "ability": "",
       "icon": "pet-taming",
-      "description": "Tames stronger pets.",
+      "description": "Tames stronger pets (no effect in the release yet).",
       "values": {}
     },
     "pet_riding": {
       "name": "Pet Riding",
       "ability": "",
+      "effect": "RidingSpeed",
       "icon": "pet-riding",
       "description": "Rides pets, faster with more points.",
-      "values": {}
+      "values": {
+        "artifactsPerPoint": {
+          "base": 2,
+          "perBonus": 0
+        }
+      }
     },
     "climbing": {
       "name": "Climbing",
       "ability": "",
+      "effect": "ClimbingSpeed",
       "icon": "climbing",
       "description": "Climbs faster.",
-      "values": {}
+      "values": {
+        "artifactsPerPoint": {
+          "base": 2,
+          "perBonus": 0
+        }
+      }
     },
     "hang_gliding": {
       "name": "Hang Gliding",
       "ability": "",
+      "effect": "HangGlidingSpeed",
       "icon": "hang-gliding",
       "description": "Glides faster.",
-      "values": {}
+      "values": {
+        "artifactsPerPoint": {
+          "base": 2,
+          "perBonus": 0
+        }
+      }
     },
     "swimming": {
       "name": "Swimming",
       "ability": "",
+      "effect": "SwimmingSpeed",
       "icon": "swimming",
       "description": "Swims faster.",
-      "values": {}
+      "values": {
+        "artifactsPerPoint": {
+          "base": 2,
+          "perBonus": 0
+        }
+      }
     },
     "boat_driving": {
       "name": "Boat Driving",
       "ability": "",
+      "effect": "SailingSpeed",
       "icon": "ship-driving",
       "description": "Sails faster.",
-      "values": {}
+      "values": {
+        "artifactsPerPoint": {
+          "base": 2,
+          "perBonus": 0
+        }
+      }
     }
   },
   "classes": [

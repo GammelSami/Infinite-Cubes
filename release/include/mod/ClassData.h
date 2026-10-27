@@ -26,6 +26,11 @@ struct Skill {
     std::string abilityName;
     int ability = 0; // cube::Ability*, 0 for none
     int maxPoints = 0; // 0: no limit
+    // A general skill's effect: the release's artifact effect it strengthens ("ClimbingSpeed", "SwimmingSpeed",
+    // "DivingStamina", "RidingSpeed", "HangGlidingSpeed", "SailingSpeed", "LampRadius"), -1 for none. Each point counts
+    // as the value "artifactsPerPoint" (2: the alpha's curve) artifacts of that effect.
+    std::string effectName;
+    int effect = -1;
     std::map<std::string, Value> values;
     // The value, or nullptr when the skill does not set it (the game's own value applies).
     const Value *value(const std::string &name) const;

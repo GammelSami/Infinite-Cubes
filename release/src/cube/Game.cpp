@@ -5310,6 +5310,10 @@ void Game::controlCharacter(double step, std::vector<NearbyCreature> &creatures)
     // The mod's alpha classes have no class skill (Shift) and no ultimate (R): the keys 1 to 3 start the class's skills.
     bool alphaClasses = mod::alphaClasses();
     if (alphaClasses) {
+        // R talks and opens, as in the alpha; the release's use control (E) does that and picks up.
+        if (m_controlStates[Controls::ButtonUltimateSkill]) {
+            m_controlStates[Controls::ButtonUse] = true;
+        }
         m_controlStates[Controls::ButtonClassSkill] = false;
         m_controlStates[Controls::ButtonUltimateSkill] = false;
     }

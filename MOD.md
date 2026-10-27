@@ -21,7 +21,7 @@ kommt nur nach `mod/main`. Der Mod-Code ist plattformneutral: Plattformcode blei
   Programm; das Spiel liest sie bei Änderung neu (Live-Tuning).
 - `tools/skill-editor`: Weboberfläche für die Skill-Daten (Python-Standardbibliothek, ohne Abhängigkeiten).
 - Alpha-Grafiken (`gui.plx`, `data3.db` der Alpha) liegen nicht im Repo: `tools/import-alpha-assets.py` kopiert sie aus
-  der eigenen Alpha-Kopie ins Laufzeitverzeichnis (`alpha-gui.plx`, `alpha-icons.db`).
+  der eigenen Alpha-Kopie ins Laufzeitverzeichnis (`alpha/gui.plx`, `alpha/icons/*.png`).
 
 ## Ziele und Stand
 
@@ -34,8 +34,10 @@ kommt nur nach `mod/main`. Der Mod-Code ist plattformneutral: Plattformcode blei
 5. [x] Alpha-HUD: Lebens-, Erfahrungs-, Manawürfelbalken oben links; HP/MP und Fähigkeitsleiste mit Icons, Abklingzeit
 6. [x] Alpha-Skillmenü (X): Spezialisierungen, Klassen-Skills (Kette), allgemeine Skills; Lernen, Zurückgeben und
        Spezialisierung wechseln beim Klassenlehrer gegen Gold
-7. [ ] Alpha-Tasten und Bewegung: R reden, E aufheben, T Haustier, G Gleiter/Boot, Strg klettern, Shift zielen; Wirkung
-       der allgemeinen Skills (Klettern, Schwimmen, Gleiten, Reiten, Zähmen) nach Skillstufe
+7. [~] Alpha-Tasten und Bewegung: X Skills, 1–3 Klassen-Skills, R reden/öffnen (E hebt auf und benutzt) sind da; die
+       allgemeinen Skills Klettern, Schwimmen, Reiten, Gleiten und Segeln wirken wie Artefakte der Release (2 je Punkt,
+       die Alpha-Kurve). Offen: Zähmen nach Skillstufe, G für Gleiter/Boot, Strg klettern, Shift zielen, Alpha-Bewegung
+       ohne Ausweichrolle
 8. [x] Weboberfläche: Skills Klassen zuordnen und duplizieren, Werte live ändern
 
 ## Benutzen
@@ -54,5 +56,5 @@ Für Tests: `CUBE_MOD_TEST_POINTS=n` gibt einer Figur ohne Punkte n Punkte in je
 - Fähigkeitsleiste: `alpha/src/cube/GameController.cpp` (`m_barAbilities`, Aktivierung beim Bar-Input)
 - Skill-Zuordnung und Boni: `alpha/src/cube/CreatureStats.cpp` (`abilitySkillIndex`, `skillBonus`, `levelBonus`)
 - Skillmenü: `alpha/src/cube/widgets/SkillWidget.cpp`, Punktevergabe in `GameController.cpp`
-- Ability-IDs: Alpha und Release zählen verschieden (Release meist +1 bis +32); die Zuordnung steht in
-  `release/src/mod/AlphaAbilities.cpp`.
+- Ability-IDs: Alpha und Release zählen verschieden (Release meist +1 bis +32). `classes.json` nennt die Fähigkeiten beim
+  Namen der Release (Tabelle in `release/src/mod/ClassData.cpp`), die Icons dazu stehen in `release/src/mod/AlphaHud.cpp`.
