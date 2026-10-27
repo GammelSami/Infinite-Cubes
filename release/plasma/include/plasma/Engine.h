@@ -168,6 +168,8 @@ public:
     PixelFont *createPixelFont(Texture *texture, int columns = -1, int rows = -1, const std::wstring &characters = L"");
     // Loads a JPG, BMP, PNG, PPM, TIF or TGA file through FreeImage as an RGBA texture.
     Texture *loadImageTexture(const std::wstring &path);
+    // The same with a texture format (the mod's pixel art icons filter to the nearest pixel).
+    Texture *loadImageTexture(const std::wstring &path, const TextureFormat &format);
     PlasmaFont *createPlasmaFont(Node *root, const std::wstring &name);
     PixelFont *createPixelFont(const std::wstring &name = L"");
     PlasmaFont *createPlasmaFont(const std::wstring &name = L"");

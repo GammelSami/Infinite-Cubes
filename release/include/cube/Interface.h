@@ -16,6 +16,10 @@ class Node;
 class Widget;
 }
 
+namespace mod {
+class AlphaHud;
+}
+
 namespace cube {
 
 class Game;
@@ -283,6 +287,7 @@ struct Interface {
     std::list<plasma::Vector<2, int>> m_buttonCenters;
     Game *m_game; // the constructor's argument
     std::list<plasma::Vector<2, int>>::iterator m_land;
+    mod::AlphaHud *m_alphaHud = nullptr; // the mod's alpha interface, made by load
 };
 
 // Formats a number for the interface using abbreviated units, such as "1.2M" or "12.3K".

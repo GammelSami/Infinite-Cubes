@@ -47,6 +47,8 @@ class Texture : public NamedObject {
 public:
     // A transient texture gets no id and drops its pixels once uploaded.
     Texture(Engine *engine, const std::wstring &name, bool transient);
+    // The id shapes refer to the texture by (MeshShape::m_texture).
+    int id() const { return m_id; }
     // Initialises the texture and copies the supplied pixels. Takes the engine lock even for a transient texture.
     Texture(Engine *engine, int width, int height, const unsigned char *pixels, const TextureFormat &format,
             const std::wstring &name, bool transient);

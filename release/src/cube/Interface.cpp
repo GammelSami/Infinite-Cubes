@@ -32,6 +32,7 @@
 #include "cube/widgets/SpriteWidget.h"
 #include "cube/widgets/StartMenuWidget.h"
 #include "cube/widgets/SystemWidget.h"
+#include "mod/AlphaHud.h"
 #include "cube/widgets/VoxelWidget.h"
 #include "cube/World.h"
 #include "cube/WorldInfo.h"
@@ -693,6 +694,7 @@ void Interface::load(const std::vector<ResolutionInfo> *displayModes)
     m_game->m_engine->root()->initializeWidgets();
     updateSlots();
     updateWorldList();
+    m_alphaHud = new mod::AlphaHud(this);
 }
 
 // Creates a text node named name under parent: a text shape with a black stroke and, as its child, the same text
@@ -1554,6 +1556,9 @@ void Interface::update(float step)
     previousHitCombo = (unsigned char)m_game->m_world->m_localCreature->m_entityData.hitCombo;
     m_inGame.m_comboPoints->setVisible(m_inGame.m_comboPoints->isPlaying());
     m_inGame.m_missionTag->setVisible(m_inGame.m_missionTag->isPlaying());
+    if (m_alphaHud && m_inGame.m_node->isVisible()) {
+        m_alphaHud->update();
+    }
     m_game->m_engine->advance((int)step);
 }
 
@@ -1588,7 +1593,8 @@ void Interface::updateAuras()
             } else {
                 instance->setText(std::to_wstring((int)(buff.timeRemaining + 500.0f) / 1000) + L" s");
             }
-            instance->setPosition(0.0f, 0.0f, (float)x, 120.0f);
+            // Below the alpha interface's bars when the mod shows them.
+            instance->setPosition(0.0f, 0.0f, (float)x, m_alphaHud && m_alphaHud->active() ? 185.0f : 120.0f);
         }
     }
 }

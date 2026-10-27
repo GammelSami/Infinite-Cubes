@@ -1996,6 +1996,11 @@ TextShape *Engine::readTextShape(std::istream &stream, std::map<int, std::string
 
 Texture *Engine::loadImageTexture(const std::wstring &path)
 {
+    return loadImageTexture(path, TextureFormat());
+}
+
+Texture *Engine::loadImageTexture(const std::wstring &path, const TextureFormat &format)
+{
     int dot = path.find_last_of(L'.');
     std::wstring extension = path.substr(dot + 1, path.size() - dot - 1);
     // Narrow toupper applied to UTF-16 code units.
@@ -2046,7 +2051,7 @@ Texture *Engine::loadImageTexture(const std::wstring &path)
         }
     }
     FreeImage_Unload(bitmap);
-    return createTexture(width, height, &pixels[0], TextureFormat());
+    return createTexture(width, height, &pixels[0], format);
 }
 
 Transformation *Engine::readTransformation(std::istream &stream, std::map<int, std::string> &names)
