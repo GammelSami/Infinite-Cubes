@@ -17,6 +17,9 @@ foreach(lib d3d11 dxgi)
   IMPORTED_NO_SONAME OFF)
 endforeach()
 
+# FAudio's option(BUILD_SHARED_LIBS ... ON) ignores this variable under its old CMake policy, and a fresh configure
+# built only the shared library.
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_SDL3 ON CACHE BOOL "" FORCE)
 FetchContent_Declare(faudio
