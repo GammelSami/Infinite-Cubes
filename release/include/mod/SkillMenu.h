@@ -56,6 +56,9 @@ private:
     AlphaHud *m_hud;
     plasma::Node *m_parent; // the in-game interface, parent of the panel and the buttons
     plasma::Node *m_panel = nullptr;
+    float m_panelWidth = 0.0f; // the panel's size in interface units at the interface scale m_panelScale (update)
+    float m_panelHeight = 0.0f;
+    float m_panelScale = 1.0f;
     plasma::Node *m_skillTemplate = nullptr;
     plasma::Node *m_childSkillTemplate = nullptr;
     plasma::Node *m_specializationButtons[2] = {nullptr, nullptr};

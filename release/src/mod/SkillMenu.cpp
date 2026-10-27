@@ -10,6 +10,8 @@
 #include "cube/ServerUpdateIds.h"
 #include "cube/World.h"
 #include "cube/widgets/ChatWidget.h"
+#include "cube/widgets/FormulaDetailsWidget.h"
+#include "cube/widgets/InventoryWidget.h"
 #include "plasma/D3D11Engine.h"
 #include "plasma/Display.h"
 #include "plasma/Node.h"
@@ -24,8 +26,8 @@ namespace mod {
 
 namespace {
 
-const float PanelWidth = 300.0f;
-const float PanelHeight = 600.0f; // the alpha's 460 and room for the hovered skill's text
+const float MinimumPanelWidth = 300.0f;
+const float MinimumPanelHeight = 560.0f; // the alpha's 460 and room for the hovered skill's text
 const float ClassMasterRangeSquared = 16.0f;
 
 // The specializations' names and icons (alpha/icons), by class and specialization.
@@ -107,7 +109,6 @@ SkillMenu::SkillMenu(cube::Game *game, AlphaHud *hud, plasma::Node *parent, plas
     m_panel = panelTemplate->instance(parent);
     m_panel->setTransformation(m_panel->m_transformation->clone());
     m_panel->setDisplay(m_panel->m_display->clone());
-    m_panel->widget()->resizeTo(PanelWidth, PanelHeight, true);
     m_panel->moveIntoWidget(panelTemplate->getName(), this, true);
     m_panel->setVisible(false);
     for (int i = 0; i < 2; i++) {
@@ -256,9 +257,25 @@ void SkillMenu::update()
     cube::Creature *player = m_game->m_world->m_localCreature;
     bool on = m_panel && alphaClasses() && player && player->m_playerData;
     bool keyDown = m_game->m_controlStates[cube::Controls::ButtonSkillMenu];
-    if (on && keyDown && !m_keyWasDown && !m_game->m_interface.m_inGame.m_chatWidget->m_typeboxActive)
+    cube::Interface::InGame &inGame = m_game->m_interface.m_inGame;
+    bool typing = inGame.m_chatWidget->m_typeboxActive;
+    if (on && keyDown && !m_keyWasDown && !typing) {
         toggle();
+        // The crafting inventory opens in the same place.
+        if (isOpen()) {
+            inGame.m_craftingInventoryWidget->getNode()->setVisible(false);
+            inGame.m_formulaDetailsWidget->getNode()->setVisible(false);
+        }
+    }
     m_keyWasDown = keyDown;
+    // Walking closes it, as it closes the release's panels (Game::update); so does the crafting inventory.
+    bool walking = !typing && (m_game->m_controlStates[cube::Controls::ButtonUp] ||
+                               m_game->m_controlStates[cube::Controls::ButtonDown] ||
+                               m_game->m_controlStates[cube::Controls::ButtonLeft] ||
+                               m_game->m_controlStates[cube::Controls::ButtonRight] ||
+                               m_game->m_gamepadWalkVector.squaredLength() > 0.1f * 0.1f);
+    if (walking || inGame.m_craftingInventoryWidget->getNode()->isVisible())
+        on = false;
     if (!on || !isOpen()) {
         if (isOpen())
             close();
@@ -267,19 +284,31 @@ void SkillMenu::update()
     if (m_builtClass != player->m_entityData.classType || m_builtSpecialization != m_specialization)
         rebuild();
 
-    // The panel left of the centre; the specializations at the top, then the class's skills in a row of four and the
-    // general skills in rows of two, each beside the one it needs (the alpha's layout).
+    // The panel in the crafting inventory's place and size (Interface::updateResolution): left of the equipment
+    // inventory, from its top to the bottom of the formula details; the widgets' view sizes are in screen pixels. The
+    // specializations at the top, then the class's skills in a row of four and the general skills in rows of two, each
+    // beside the one it needs (the alpha's layout), centred.
     float scale = m_game->m_interface.m_scale;
-    float x = (float)(m_game->m_width / 2) / scale - PanelWidth - 120.0f;
-    float y = (float)(m_game->m_height / 2) / scale - PanelHeight * 0.5f;
+    float width = (std::max)(inGame.m_craftingInventoryWidget->viewWidth() / scale, MinimumPanelWidth);
+    float x = ((float)(m_game->m_width / 2) - inGame.m_equipmentInventoryWidget->viewWidth() * 0.5f) / scale -
+              10.0f - width;
+    float y = ((float)(m_game->m_height / 2) - inGame.m_equipmentInventoryWidget->getViewHeight()) / scale - 50.0f;
+    float bottom = ((float)(m_game->m_height / 2) + inGame.m_formulaDetailsWidget->getViewHeight()) / scale - 40.0f;
+    float height = (std::max)(bottom - y, MinimumPanelHeight);
+    if (std::fabs(width - m_panelWidth) > 0.5f || std::fabs(height - m_panelHeight) > 0.5f || scale != m_panelScale) {
+        m_panelWidth = width;
+        m_panelHeight = height;
+        m_panelScale = scale;
+        m_panel->widget()->resizeTo(width * scale, height * scale, true);
+    }
     m_panel->setPosition(0.0f, 0.0f, x, y);
-    float left = x + 50.0f;
+    float left = x + (width - 4 * 55.0f) * 0.5f + 5.0f;
     float top = y + 70.0f;
     m_hovered.clear();
     for (int i = 0; i < 2; i++) {
         plasma::Node *button = m_specializationButtons[i];
         button->setVisible(true);
-        button->setPosition(0.0f, 0.0f, left + i * 70.0f, top);
+        button->setPosition(0.0f, 0.0f, x + width * 0.5f + (i - 1) * 70.0f + 5.0f, top);
         bool hovered = button->widget() && button->widget()->isPointerOver();
         setFrame(button, hovered);
         m_hud->setIcon(button, specializationIcon(player->m_entityData.classType, i), i == m_specialization);
@@ -456,7 +485,7 @@ void SkillMenu::draw()
         renderText(widen(skill->name) + L" (" + std::to_wstring(points) + L")", 15.0f, y);
         setTextColor(white);
         y += 2.0f;
-        for (const std::wstring &line : wrap(widen(skill->description), PanelWidth - 30.0f)) {
+        for (const std::wstring &line : wrap(widen(skill->description), m_panelWidth - 30.0f)) {
             y += 14.0f;
             renderText(line, 15.0f, y);
         }
