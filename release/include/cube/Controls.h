@@ -29,7 +29,12 @@ struct Controls {
         ButtonMultiplayerMenu = 20, // (J)
         ButtonZoomIn = 21,          // no default (zero)
         ButtonZoomOut = 22,         // no default (zero)
-        ButtonCount = 23
+        // The mod's alpha controls (src/mod): the class skills of the ability bar and the skill menu.
+        ButtonSkill1 = 23,    // (1)
+        ButtonSkill2 = 24,    // (2)
+        ButtonSkill3 = 25,    // (3)
+        ButtonSkillMenu = 26, // (X)
+        ButtonCount = 27
     };
 
     // Binding devices: the frame loop reads keyboard scan codes or DIMOUSESTATE::rgbButtons; KeyNames displays mouse

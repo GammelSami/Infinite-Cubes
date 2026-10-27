@@ -13,6 +13,9 @@
 #include "cube/CreatureIds.h"
 #include "cube/ItemIds.h"
 #include "cube/SpriteIds.h"
+#include "mod/ClassData.h"
+#include "mod/Hooks.h"
+#include "mod/Progress.h"
 
 namespace cube {
 
@@ -703,6 +706,10 @@ float Creature::climbingSpeed()
 
 int Creature::cooldown(int skill)
 {
+    int tuned = 0;
+    if (mod::cooldown(this, skill, tuned)) {
+        return tuned;
+    }
     switch (skill) {
     case AbilityIntercept:
         if (findBuff(BuffNinjutsu)) {
@@ -5502,6 +5509,10 @@ float Creature::magicDamageReduction()
 
 float Creature::manaCost(int skill, int unusedArgument)
 {
+    float tuned = 0.0f;
+    if (mod::manaCost(this, skill, tuned)) {
+        return tuned;
+    }
     switch (skill) {
     case AbilityFireVortex:
     case AbilityWaterVortex:
@@ -5557,6 +5568,9 @@ long long Creature::maxAggroTarget()
 
 int maxExperience(int level)
 {
+    if (mod::alphaClasses()) {
+        return mod::maxExperience(level);
+    }
     return (int)(pow(2.0, (level - 1) * 0.5f) * 10.0);
 }
 

@@ -1,0 +1,593 @@
+{
+  "//": "The mod's classes (MOD.md). A value is base + perBonus * bonus, the bonus growing from 0 towards 1 with the skill's points (1 - 1 / (points / 10 + 1)). Values: cooldown (ms), mana (part of the mana bar), duration (ms), strength (Bulwark: the damage taken; Mana Shield: times the spell power; Swiftness: the speed bonus), speed and rise (blocks per second). A skill without a value keeps the game's. bar: the skills of the keys 1 to 3; tree: the skill menu, a skill needing points in another.",
+  "alphaClasses": true,
+  "progression": {
+    "skillPointsPerLevel": 2,
+    "manaCubesPerSkillPoint": 4,
+    "killXP": 20,
+    "bossXPFactor": 20,
+    "tintedXPFactor": 10,
+    "levelXPBase": 50,
+    "levelXPScale": 1000
+  },
+  "skills": {
+    "smash": {
+      "name": "Smash",
+      "ability": "Smash",
+      "icon": "smash",
+      "description": "Leaps at the target and smashes the ground.",
+      "values": {
+        "cooldown": {
+          "base": 20000,
+          "perBonus": -14000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        },
+        "speed": {
+          "base": 50,
+          "perBonus": 0
+        },
+        "rise": {
+          "base": 15,
+          "perBonus": 0
+        }
+      }
+    },
+    "cyclone": {
+      "name": "Cyclone",
+      "ability": "Cyclone",
+      "icon": "cyclone",
+      "description": "Spins with the weapon, hitting everything around.",
+      "values": {
+        "cooldown": {
+          "base": 60000,
+          "perBonus": -40000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        }
+      }
+    },
+    "war_frenzy": {
+      "name": "War Frenzy",
+      "ability": "WarFrenzy",
+      "icon": "warfrenzy",
+      "description": "Attacks faster for a while.",
+      "values": {
+        "cooldown": {
+          "base": 60000,
+          "perBonus": -30000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        },
+        "duration": {
+          "base": 10000,
+          "perBonus": 0
+        }
+      }
+    },
+    "bulwark": {
+      "name": "Bulwark",
+      "ability": "Bulwark",
+      "icon": "bulwark",
+      "description": "Takes less damage for a while and shakes off stuns.",
+      "values": {
+        "cooldown": {
+          "base": 60000,
+          "perBonus": -30000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        },
+        "duration": {
+          "base": 10000,
+          "perBonus": 0
+        },
+        "strength": {
+          "base": 0.75,
+          "perBonus": -0.3
+        }
+      }
+    },
+    "ranger_kick": {
+      "name": "Kick",
+      "ability": "RangerKick",
+      "icon": "ranger-kick",
+      "description": "Kicks the target away.",
+      "values": {
+        "cooldown": {
+          "base": 8000,
+          "perBonus": -8000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        }
+      }
+    },
+    "retreat": {
+      "name": "Retreat",
+      "ability": "Retreat",
+      "icon": "retreat2",
+      "description": "Jumps back from the target.",
+      "values": {
+        "cooldown": {
+          "base": 16000,
+          "perBonus": -10000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        },
+        "speed": {
+          "base": 20,
+          "perBonus": 15
+        },
+        "rise": {
+          "base": 5,
+          "perBonus": 12
+        }
+      }
+    },
+    "aim": {
+      "name": "Aim",
+      "ability": "Aim",
+      "icon": "aim",
+      "description": "Aims carefully for a stronger shot.",
+      "values": {
+        "cooldown": {
+          "base": 12000,
+          "perBonus": -10000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        }
+      }
+    },
+    "swiftness": {
+      "name": "Swiftness",
+      "ability": "Swiftness",
+      "icon": "swiftness",
+      "description": "Moves faster for a while.",
+      "values": {
+        "cooldown": {
+          "base": 60000,
+          "perBonus": -30000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        },
+        "duration": {
+          "base": 10000,
+          "perBonus": 0
+        },
+        "strength": {
+          "base": 1,
+          "perBonus": 1
+        }
+      }
+    },
+    "fire_explosion": {
+      "name": "Fire Explosion",
+      "ability": "FireExplosion",
+      "icon": "fire-explosion",
+      "description": "Sets off an explosion of fire.",
+      "values": {
+        "cooldown": {
+          "base": 8000,
+          "perBonus": -8000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        }
+      }
+    },
+    "healing_stream": {
+      "name": "Healing Stream",
+      "ability": "HealingStream",
+      "icon": "healing-stream",
+      "description": "Heals the target, or with Shift the mage.",
+      "values": {
+        "cooldown": {
+          "base": 0,
+          "perBonus": 0
+        },
+        "mana": {
+          "base": 0.125,
+          "perBonus": -0.09375
+        }
+      }
+    },
+    "mana_shield": {
+      "name": "Mana Shield",
+      "ability": "ManaShield",
+      "icon": "mana-shield",
+      "description": "A shield that absorbs damage, from the spell power.",
+      "values": {
+        "cooldown": {
+          "base": 20000,
+          "perBonus": -10000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        },
+        "duration": {
+          "base": 30000,
+          "perBonus": 0
+        },
+        "strength": {
+          "base": 2,
+          "perBonus": 2
+        }
+      }
+    },
+    "teleport": {
+      "name": "Teleport",
+      "ability": "Teleport",
+      "icon": "teleport",
+      "description": "Teleports a short way.",
+      "values": {
+        "cooldown": {
+          "base": 16000,
+          "perBonus": -10000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        }
+      }
+    },
+    "intercept": {
+      "name": "Intercept",
+      "ability": "Intercept",
+      "icon": "intercept",
+      "description": "Dashes to the target.",
+      "values": {
+        "cooldown": {
+          "base": 20000,
+          "perBonus": -12000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        },
+        "speed": {
+          "base": 50,
+          "perBonus": 0
+        }
+      }
+    },
+    "sneak": {
+      "name": "Sneak",
+      "ability": "Sneak",
+      "icon": "sneak",
+      "description": "Sneaks unseen.",
+      "values": {
+        "cooldown": {
+          "base": 0,
+          "perBonus": 0
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        }
+      }
+    },
+    "camouflage": {
+      "name": "Camouflage",
+      "ability": "Camouflage",
+      "icon": "camouflage",
+      "description": "Becomes nearly invisible for a while.",
+      "values": {
+        "cooldown": {
+          "base": 60000,
+          "perBonus": -30000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        },
+        "duration": {
+          "base": 8000,
+          "perBonus": 12000
+        }
+      }
+    },
+    "shuriken": {
+      "name": "Shuriken",
+      "ability": "Shuriken",
+      "icon": "shuriken",
+      "description": "Rolls away and throws shuriken.",
+      "values": {
+        "cooldown": {
+          "base": 20000,
+          "perBonus": -14000
+        },
+        "mana": {
+          "base": 0,
+          "perBonus": 0
+        },
+        "speed": {
+          "base": 30,
+          "perBonus": 0
+        },
+        "rise": {
+          "base": 20,
+          "perBonus": 0
+        }
+      }
+    },
+    "pet_taming": {
+      "name": "Pet Taming",
+      "ability": "",
+      "icon": "pet-taming",
+      "description": "Tames stronger pets.",
+      "values": {}
+    },
+    "pet_riding": {
+      "name": "Pet Riding",
+      "ability": "",
+      "icon": "pet-riding",
+      "description": "Rides pets, faster with more points.",
+      "values": {}
+    },
+    "climbing": {
+      "name": "Climbing",
+      "ability": "",
+      "icon": "climbing",
+      "description": "Climbs faster.",
+      "values": {}
+    },
+    "hang_gliding": {
+      "name": "Hang Gliding",
+      "ability": "",
+      "icon": "hang-gliding",
+      "description": "Glides faster.",
+      "values": {}
+    },
+    "swimming": {
+      "name": "Swimming",
+      "ability": "",
+      "icon": "swimming",
+      "description": "Swims faster.",
+      "values": {}
+    },
+    "boat_driving": {
+      "name": "Boat Driving",
+      "ability": "",
+      "icon": "ship-driving",
+      "description": "Sails faster.",
+      "values": {}
+    }
+  },
+  "classes": [
+    {
+      "class": "Warrior",
+      "specialization": "Berserker",
+      "bar": [
+        "smash",
+        "cyclone",
+        "war_frenzy"
+      ],
+      "tree": [
+        {
+          "skill": "smash"
+        },
+        {
+          "skill": "cyclone",
+          "requires": "smash",
+          "points": 5
+        },
+        {
+          "skill": "war_frenzy",
+          "requires": "cyclone",
+          "points": 5
+        }
+      ]
+    },
+    {
+      "class": "Warrior",
+      "specialization": "Guardian",
+      "bar": [
+        "smash",
+        "cyclone",
+        "bulwark"
+      ],
+      "tree": [
+        {
+          "skill": "smash"
+        },
+        {
+          "skill": "cyclone",
+          "requires": "smash",
+          "points": 5
+        },
+        {
+          "skill": "bulwark",
+          "requires": "cyclone",
+          "points": 5
+        }
+      ]
+    },
+    {
+      "class": "Ranger",
+      "specialization": "Sniper",
+      "bar": [
+        "ranger_kick",
+        "retreat",
+        "aim"
+      ],
+      "tree": [
+        {
+          "skill": "ranger_kick"
+        },
+        {
+          "skill": "retreat",
+          "requires": "ranger_kick",
+          "points": 5
+        },
+        {
+          "skill": "aim",
+          "requires": "retreat",
+          "points": 5
+        }
+      ]
+    },
+    {
+      "class": "Ranger",
+      "specialization": "Scout",
+      "bar": [
+        "ranger_kick",
+        "retreat",
+        "swiftness"
+      ],
+      "tree": [
+        {
+          "skill": "ranger_kick"
+        },
+        {
+          "skill": "retreat",
+          "requires": "ranger_kick",
+          "points": 5
+        },
+        {
+          "skill": "swiftness",
+          "requires": "retreat",
+          "points": 5
+        }
+      ]
+    },
+    {
+      "class": "Mage",
+      "specialization": "Fire",
+      "bar": [
+        "fire_explosion",
+        "mana_shield",
+        "teleport"
+      ],
+      "tree": [
+        {
+          "skill": "fire_explosion"
+        },
+        {
+          "skill": "mana_shield",
+          "requires": "fire_explosion",
+          "points": 5
+        },
+        {
+          "skill": "teleport",
+          "requires": "mana_shield",
+          "points": 5
+        }
+      ]
+    },
+    {
+      "class": "Mage",
+      "specialization": "Water",
+      "bar": [
+        "healing_stream",
+        "mana_shield",
+        "teleport"
+      ],
+      "tree": [
+        {
+          "skill": "healing_stream"
+        },
+        {
+          "skill": "mana_shield",
+          "requires": "healing_stream",
+          "points": 5
+        },
+        {
+          "skill": "teleport",
+          "requires": "mana_shield",
+          "points": 5
+        }
+      ]
+    },
+    {
+      "class": "Rogue",
+      "specialization": "Assassin",
+      "bar": [
+        "intercept",
+        "sneak",
+        "camouflage"
+      ],
+      "tree": [
+        {
+          "skill": "intercept"
+        },
+        {
+          "skill": "sneak",
+          "requires": "intercept",
+          "points": 5
+        },
+        {
+          "skill": "camouflage",
+          "requires": "sneak",
+          "points": 5
+        }
+      ]
+    },
+    {
+      "class": "Rogue",
+      "specialization": "Ninja",
+      "bar": [
+        "intercept",
+        "sneak",
+        "shuriken"
+      ],
+      "tree": [
+        {
+          "skill": "intercept"
+        },
+        {
+          "skill": "sneak",
+          "requires": "intercept",
+          "points": 5
+        },
+        {
+          "skill": "shuriken",
+          "requires": "sneak",
+          "points": 5
+        }
+      ]
+    }
+  ],
+  "generalSkills": [
+    {
+      "skill": "pet_taming"
+    },
+    {
+      "skill": "pet_riding",
+      "requires": "pet_taming",
+      "points": 5
+    },
+    {
+      "skill": "climbing"
+    },
+    {
+      "skill": "hang_gliding",
+      "requires": "climbing",
+      "points": 5
+    },
+    {
+      "skill": "swimming"
+    },
+    {
+      "skill": "boat_driving",
+      "requires": "swimming",
+      "points": 5
+    }
+  ]
+}

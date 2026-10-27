@@ -61,6 +61,14 @@ std::wstring Controls::buttonName(int action)
         return L"Zoom In";
     case ButtonZoomOut:
         return L"Zoom Out";
+    case ButtonSkill1:
+        return L"Skill 1";
+    case ButtonSkill2:
+        return L"Skill 2";
+    case ButtonSkill3:
+        return L"Skill 3";
+    case ButtonSkillMenu:
+        return L"Skill Menu";
     default:
         return L"Unknown " + std::to_wstring(action);
     }
@@ -145,6 +153,18 @@ void Controls::load()
         if (key == "ButtonZoomOut") {
             index = ButtonZoomOut;
         }
+        if (key == "ButtonSkill1") {
+            index = ButtonSkill1;
+        }
+        if (key == "ButtonSkill2") {
+            index = ButtonSkill2;
+        }
+        if (key == "ButtonSkill3") {
+            index = ButtonSkill3;
+        }
+        if (key == "ButtonSkillMenu") {
+            index = ButtonSkillMenu;
+        }
         if (index < 0 || index >= ButtonCount) {
             continue;
         }
@@ -186,6 +206,10 @@ void Controls::reset()
     buttons[ButtonMultiplayerMenu] = Button(DIK_J, DeviceKeyboard);
     buttons[ButtonCraftingMenu] = Button(DIK_C, DeviceKeyboard);
     buttons[ButtonSystemMenu] = Button(DIK_O, DeviceKeyboard);
+    buttons[ButtonSkill1] = Button(DIK_1, DeviceKeyboard);
+    buttons[ButtonSkill2] = Button(DIK_2, DeviceKeyboard);
+    buttons[ButtonSkill3] = Button(DIK_3, DeviceKeyboard);
+    buttons[ButtonSkillMenu] = Button(DIK_X, DeviceKeyboard);
 }
 
 void Controls::save()
@@ -220,6 +244,10 @@ void Controls::save()
          << std::endl;
     file << "ButtonZoomIn " << buttons[ButtonZoomIn].code << " " << buttons[ButtonZoomIn].device << std::endl;
     file << "ButtonZoomOut " << buttons[ButtonZoomOut].code << " " << buttons[ButtonZoomOut].device << std::endl;
+    file << "ButtonSkill1 " << buttons[ButtonSkill1].code << " " << buttons[ButtonSkill1].device << std::endl;
+    file << "ButtonSkill2 " << buttons[ButtonSkill2].code << " " << buttons[ButtonSkill2].device << std::endl;
+    file << "ButtonSkill3 " << buttons[ButtonSkill3].code << " " << buttons[ButtonSkill3].device << std::endl;
+    file << "ButtonSkillMenu " << buttons[ButtonSkillMenu].code << " " << buttons[ButtonSkillMenu].device << std::endl;
 }
 
 }

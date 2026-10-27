@@ -95,6 +95,16 @@
         "steam/steamtypes.h": "ae406ccdfe0873e4cfced25bbc4530d7b18a73b44d40f012454f0699999c1a04",
         "steam/steamuniverse.h": "91b43f660be112f6496eb26480732b28a9981fc7a48c78a41c90966e802b05a3"
       }
+    },
+    "nlohmann_json": {
+      "//": "JSON for Modern C++ 3.11.3, the release's single header (MIT, LICENSE.MIT). Used by the mod's data files (src/mod). Header-only: put thirdparty/nlohmann on the include directories to #include \"nlohmann/json.hpp\".",
+      "url": "https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp",
+      "member_prefix": "",
+      "directory": "nlohmann",
+      "files": {
+        "nlohmann/json.hpp": "9bea4c8066ef4a1c206b2be5a36302f8926f7fdc6087af5d20b417d0cf103ea6",
+        "LICENSE.MIT": "86b998c792894ccb911a1cb7994f7a9652894e7a094c0b5e45be2f553f45cf14"
+      }
     }
   },
   "libraries": {

@@ -149,6 +149,10 @@ else()
 endif()
 
 include(cmake/Shaders.cmake)
+# The mod (src/mod): the JSON reader of its data, and the data (data/mod) next to the executable.
+target_include_directories(cubeworld PRIVATE thirdparty/nlohmann)
+add_custom_command(TARGET cubeworld POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data/mod" "$<TARGET_FILE_DIR:cubeworld>/mod")
 if(NOT CUBE_LINUX)
   # XAudio2 2.8 (Windows 8 and later), the version the game was written for.
   target_link_libraries(cubeworld PRIVATE xaudio2_8)

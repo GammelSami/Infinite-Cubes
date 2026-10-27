@@ -72,6 +72,8 @@
 #include "cube/SpriteIds.h"
 
 #include "cube/InterfaceIds.h"
+#include "mod/ClassData.h"
+#include "mod/Hooks.h"
 #include "plasma/EditFilter.h"
 
 namespace cube {
@@ -5299,6 +5301,12 @@ void Game::moveCharacter(double step)
 
 void Game::controlCharacter(double step, std::vector<NearbyCreature> &creatures)
 {
+    // The mod's alpha classes have no class skill (Shift) and no ultimate (R): the keys 1 to 3 start the class's skills.
+    bool alphaClasses = mod::alphaClasses();
+    if (alphaClasses) {
+        m_controlStates[Controls::ButtonClassSkill] = false;
+        m_controlStates[Controls::ButtonUltimateSkill] = false;
+    }
     m_interface.m_inGame.m_crosshair->setText(L"");
     static bool mousePressed; // previous mouse button 0 state
     if (m_engine->isButtonDown(0) && !mousePressed) {
@@ -6255,7 +6263,9 @@ void Game::controlCharacter(double step, std::vector<NearbyCreature> &creatures)
     static bool movementSkillPressed;    // previous control 10 state
     static unsigned int spellPressedAt;  // written on the class 2/4 control edge
     static unsigned int rangerPressedAt; // written on the class 3 control edge
-    if (!m_controlStates[Controls::ButtonAttack] && !m_controlStates[Controls::ButtonSpecialAttack]) {
+    if (alphaClasses) {
+        mod::controlBar(this);
+    } else if (!m_controlStates[Controls::ButtonAttack] && !m_controlStates[Controls::ButtonSpecialAttack]) {
         player = m_world->m_localCreature;
         if (((player->m_entityData.classType == ClassRogue &&
               player->m_entityData.specialization == SpecializationAssassin) ||

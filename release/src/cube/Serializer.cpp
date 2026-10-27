@@ -259,6 +259,7 @@ void Serializer::loadCreature(Creature *creature)
             creature->m_playerData->purchasesByShop[key].push_back(item);
         }
     }
+    creature->m_playerData->modProgress.read(*m_stream);
 }
 
 // Reads what saveWorldState wrote. A state of another format version keeps only the day and the time. The counts and
@@ -477,6 +478,7 @@ void Serializer::saveCreature(Creature *creature)
         for (const Item &item : entry.second)
             m_stream->write(item);
     }
+    creature->m_playerData->modProgress.write(*m_stream);
 }
 
 // Writes the format version (m_stateVersion), the day and the time, the two id sets and, for every zone record, its

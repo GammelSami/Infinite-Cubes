@@ -308,7 +308,7 @@ public:
     bool m_gamepadActive;  // 0; read by Tick, ControlsWidget and the interface drawing
     STEAM_CALLBACK(Game, onP2PSessionRequest, P2PSessionRequest_t);
     ServerUpdates m_serverUpdates; // Event queues for the current tick.
-    bool m_controlStates[23];
+    bool m_controlStates[Controls::ButtonCount];
     bool m_keyStates[256];
     Options m_options;                           // Copied from the constructor argument.
     Controls m_controls;                         // Constructed with Game.

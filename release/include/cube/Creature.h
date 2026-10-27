@@ -13,6 +13,7 @@
 #include "cube/IntTriple.h"
 #include "cube/Item.h"
 #include "cube/WorldMap.h"
+#include "mod/Progress.h"
 #include "plasma/Vector.h"
 
 namespace gfx {
@@ -228,6 +229,7 @@ struct PlayerData : CharacterStyle {
     std::set<std::array<int, 2>> unusedCellSet; // constructed, copied and destroyed only
     std::map<std::array<int, 2>, unsigned char> placeVisibility;
     std::set<IntTriple> collectedPlacedItems;
+    mod::Progress modProgress; // the mod's skill points (src/mod)
     std::set<IntTriple> savedTripleSet;
     std::set<std::array<int, 2>> discoveredMarkers;
     std::set<std::array<int, 2>> knownMissions;

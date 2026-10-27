@@ -23,6 +23,7 @@
 #include "cube/BlockIds.h"
 #include "cube/ItemIds.h"
 #include "cube/ServerUpdateIds.h"
+#include "mod/Hooks.h"
 #include "cube/WorldIds.h"
 #include "cube/ZoneIds.h"
 
@@ -494,6 +495,9 @@ void World::applyBuff(Creature *creature, const Creature::Buff &buff, bool repla
 
 void World::applyBuffSkill(Creature *creature, int skill)
 {
+    if (mod::applyBuffSkill(this, creature, skill)) {
+        return;
+    }
     Creature::Buff buff;
     buff.sourceId = creature->m_id;
     ServerUpdates::BuffPacket packet;
@@ -4806,8 +4810,9 @@ void World::onAttack(Creature *attacker, Creature *target)
 void World::onKill(const ServerUpdates::KillPacket &kill)
 {
     if (m_localCreature && kill.killerId == m_localCreature->m_id) {
-        // The lookup's result is not used.
+        // The release does not use the victim; the mod gives the alpha's experience for it.
         Creature *victim = creatureByID(kill.targetId);
+        mod::onKill(this, m_localCreature, victim);
     }
 }
 
