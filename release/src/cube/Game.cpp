@@ -4362,7 +4362,8 @@ void Game::update(double milliseconds)
     }
 
     // The map dragged with the gamepad: the pointer follows the overlay and the stick moves the map, faster when
-    // zoomed out. Otherwise walking (or the stick) closes every menu and the map.
+    // zoomed out. Otherwise walking (or the stick) closes every menu; the map stays open (the mod: M opens and closes
+    // it while walking, as in the alpha).
     if (m_interface.m_mapOpen && m_gamepadActive) {
         m_engine->movePointer((float)m_width * m_mapOverlayPosition[0],
                               (1.0f - m_mapOverlayPosition[1]) * (float)m_height);
@@ -4378,7 +4379,6 @@ void Game::update(double milliseconds)
                  m_controlStates[Controls::ButtonRight] || m_controlStates[Controls::ButtonDown]) &&
                 !m_interface.m_inGame.m_chatWidget->m_typeboxActive) ||
                m_gamepadWalkVector.squaredLength() > 0.1f * 0.1f) {
-        m_interface.m_mapOpen = false;
         m_interface.m_inGame.m_equipmentInventoryWidget->getNode()->setVisible(false);
         m_interface.m_inGame.m_vendorInventoryWidget->getNode()->setVisible(false);
         m_interface.m_inGame.m_craftingInventoryWidget->getNode()->setVisible(false);
