@@ -6,7 +6,7 @@ this folder supplies the Windows parts it uses:
 | Windows                         | Linux                                                   |
 |---------------------------------|---------------------------------------------------------|
 | Direct3D 9                      | DXVK-native (`libdxvk_d3d9.so`, Direct3D 9 on Vulkan)   |
-| window, messages, DirectInput 8 | SDL3 (`main.cpp`)                                       |
+| window, messages, DirectInput 8 | SDL3 (`main.cpp`), also gamepads                        |
 | XAudio2 2.7                     | FAudio (`XAudio2_7.h`)                                  |
 | critical sections, threads, timers | `windows.h`, `Thread.cpp` (C++ standard library)     |
 | Winsock                         | POSIX sockets (`winsock2.h`)                            |
@@ -46,3 +46,36 @@ the x64 Windows build (it keeps pointers in 32-bit ints).
 `Cube` looks for `lib/libdxvk_d3d9.so` (and FAudio) next to itself (`$ORIGIN/lib`) and changes into
 its own folder at start, so the folder holds the executable, `lib/` and the game's data files
 (data1-4.db, db.dat, resource1/2.dat, logo.bmp, *.plx, options.cfg). `Server` needs no libraries.
+
+## Gamepad
+
+Any pad SDL3 knows works next to keyboard and mouse (the Windows alpha had none). The layout follows
+the release's own where the alpha has the same action. Buttons are named as on an Xbox pad (PlayStation:
+A = Cross, B = Circle, X = Square, Y = Triangle).
+
+| Button                 | In play                                  | While the cursor is free      |
+|------------------------|------------------------------------------|-------------------------------|
+| left stick             | walk (analog)                            | move the cursor               |
+| right stick            | camera                                   | up/down: scroll, zoom the map |
+| RB                     | attack (left mouse button)               |                               |
+| RT                     | special attack (right mouse button)      |                               |
+| LB + left stick        | dodge roll (middle mouse button)         |                               |
+| B                      | jump; again in the air: glider (G)       | close the open window         |
+| A                      | use and pick up (R and E)                | click                         |
+| X                      | quick item (Q)                           | right click                   |
+| Y (hold)               | climb (Ctrl)                             |                               |
+| LT + X / Y / B / A     | skill 1 / 2 / 3 / 4                      |                               |
+| d-pad up / down        | zoom in / out                            | the same                      |
+| d-pad left             | map (M)                                  | the same                      |
+| d-pad right            | lamp (F)                                 | the same                      |
+| LT + d-pad up          | glider or boat (G)                       | the same                      |
+| LT + d-pad down        | skill tree (X)                           | the same                      |
+| LT + d-pad left        | crafting (C)                             | the same                      |
+| LT + d-pad right       | all life bars (V)                        | the same                      |
+| L3 (press left stick)  | call the pet (T)                         |                               |
+| R3 (press right stick) | quick-item ring (Tab; left stick picks)  |                               |
+| Back / View            | inventory (I)                            | the same                      |
+| Start / Menu           | game menu (Escape)                       | the same                      |
+
+A button held while a window opens or closes acts again only after it was released (B closing the
+inventory does not jump). The camera turns up to 180 degrees a second whatever the mouse's camera speed.

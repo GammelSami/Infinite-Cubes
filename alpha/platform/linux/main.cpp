@@ -1,5 +1,5 @@
 // The native Linux entry point (src/main.cpp's WinMain on Windows): SDL3 opens the window and reads
-// keyboard and mouse, DXVK-native provides Direct3D 9 on Vulkan for that window and FAudio plays the
+// keyboard, mouse and gamepad, DXVK-native provides Direct3D 9 on Vulkan for that window and FAudio plays the
 // XAudio2 sound. The frame loop, the device setup and the input the game receives are WinMain's: key
 // events carry Windows virtual-key codes, the held keys and buttons are polled each frame as
 // DirectInput did, and while the game hides the cursor the mouse reports relative motion.
@@ -17,9 +17,12 @@
 
 #include "plasma/D3D9Engine.h"
 #include "plasma/FontEngine.h"
+#include "plasma/Node.h"
 #include "plasma/StringConversion.h"
 #include "plasma/Vector.h"
 #include "cube/CubeShader.h"
+#include "cube/Creature.h"
+#include "cube/CreatureIds.h"
 #include "cube/GameController.h"
 #include "cube/DefaultBlocks.h"
 #include "cube/Options.h"
@@ -157,6 +160,241 @@ static void cursorPosition(float &x, float &y)
     }
 }
 
+// The gamepad (Windows had none: the game's stick inputs were never set). It acts as more keys and mouse
+// buttons, laid out like the release's own XInput layout where the alpha has the same action (see
+// platform/linux/README.md for the table). In play the left stick fills m_moveStick and the right stick
+// turns the camera like the mouse; while the cursor is free the left stick moves it, A and X click and B
+// closes the open window.
+SDL_Gamepad *g_gamepad;
+bool g_padPointer;   // the pad moved the free cursor last; the mouse's position is ignored until it moves
+float g_padPointerX; // the pad's cursor in back-buffer pixels
+float g_padPointerY;
+bool g_padHeld[InputCount];             // inputs the pad holds this frame
+bool g_padButtons[3];                   // mouse buttons the pad holds (plasma::MOUSE_BUTTON_*)
+plasma::Vector<2, int> g_padMove(0, 0); // m_moveStick (-32767..32767, up positive as in XInput)
+
+namespace {
+enum {
+    PadDeadZone = 8000,         // of 32767, for both sticks
+    PadTriggerThreshold = 8000, // of 32767
+    PadFirstRepeat = 300,       // ms before a held wheel direction repeats
+    PadRepeat = 100,            // ms between repeated wheel steps
+    PadLeftTrigger = SDL_GAMEPAD_BUTTON_COUNT, // bit numbers of the triggers next to the buttons'
+    PadRightTrigger
+};
+// Degrees per second the camera turns at full deflection, whatever the mouse's camera speed option.
+const float PadLookSpeed = 180.0f;
+// Window heights per second the free cursor moves at full deflection.
+const float PadPointerSpeed = 1.2f;
+}
+
+// A stick with a round dead zone: (0, 0) inside it, outside rescaled to start at 0 and reach length 1.
+// y grows downwards, as SDL reports it.
+static void padStick(SDL_GamepadAxis xAxis, SDL_GamepadAxis yAxis, float &x, float &y)
+{
+    x = SDL_GetGamepadAxis(g_gamepad, xAxis) / 32767.0f;
+    y = SDL_GetGamepadAxis(g_gamepad, yAxis) / 32767.0f;
+    float length = sqrtf(x * x + y * y);
+    const float deadZone = PadDeadZone / 32767.0f;
+    if (length <= deadZone) {
+        x = 0.0f;
+        y = 0.0f;
+        return;
+    }
+    float scaled = (length - deadZone) / (1.0f - deadZone);
+    if (scaled > 1.0f)
+        scaled = 1.0f;
+    x *= scaled / length;
+    y *= scaled / length;
+}
+
+// A key event as the keyboard sends it.
+static void padKey(unsigned char key, bool down)
+{
+    if (down) {
+        g_engine->keyPressed(key);
+        g_game->handleKeyDown(key);
+    } else {
+        g_engine->keyReleased(key);
+        g_game->handleKeyUp(key);
+    }
+}
+
+// Reads the pad once per frame: sends key and button events for changed outputs, scrolls, moves the free
+// cursor or adds the camera turn to the mouse motion, and fills g_padHeld, g_padButtons and g_padMove for
+// the input poll. Without focus or pad everything is released.
+static void updateGamepad(bool active)
+{
+    static DWORD s_lastTime;
+    DWORD now = timeGetTime();
+    int milliseconds = s_lastTime ? (int)(now - s_lastTime) : 0;
+    if (milliseconds > 100)
+        milliseconds = 100;
+    s_lastTime = now;
+
+    bool keys[256] = {};
+    bool buttons[3] = {};
+    for (int i = 0; i < InputCount; i++)
+        g_padHeld[i] = false;
+    g_padMove = plasma::Vector<2, int>(0, 0);
+    int wheel = 0;
+    int pulseKey = 0; // a key pressed and released at once
+
+    if (active && g_gamepad) {
+        Uint32 down = 0;
+        for (int i = 0; i < SDL_GAMEPAD_BUTTON_COUNT; i++)
+            if (SDL_GetGamepadButton(g_gamepad, (SDL_GamepadButton)i))
+                down |= 1u << i;
+        if (SDL_GetGamepadAxis(g_gamepad, SDL_GAMEPAD_AXIS_LEFT_TRIGGER) > PadTriggerThreshold)
+            down |= 1u << PadLeftTrigger;
+        if (SDL_GetGamepadAxis(g_gamepad, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) > PadTriggerThreshold)
+            down |= 1u << PadRightTrigger;
+        // A button held while the cursor appears or disappears does nothing until released: B closing
+        // the inventory does not also jump.
+        bool menu = g_game->isCursorVisible();
+        static bool s_menu;
+        static Uint32 s_ignored;
+        if (menu != s_menu)
+            s_ignored = down;
+        s_menu = menu;
+        s_ignored &= down;
+        down &= ~s_ignored;
+        static Uint32 s_down;
+        Uint32 pressed = down & ~s_down;
+        s_down = down;
+        auto held = [down](int bit) { return (down & (1u << bit)) != 0; };
+
+        float leftX, leftY, rightX, rightY;
+        padStick(SDL_GAMEPAD_AXIS_LEFTX, SDL_GAMEPAD_AXIS_LEFTY, leftX, leftY);
+        padStick(SDL_GAMEPAD_AXIS_RIGHTX, SDL_GAMEPAD_AXIS_RIGHTY, rightX, rightY);
+        // The left trigger switches the face buttons to the skills and the d-pad to more windows.
+        bool layer = held(PadLeftTrigger);
+
+        keys[VK_ESCAPE] = held(SDL_GAMEPAD_BUTTON_START);
+        keys['I'] = held(SDL_GAMEPAD_BUTTON_BACK);
+        if (layer) {
+            keys['G'] = held(SDL_GAMEPAD_BUTTON_DPAD_UP);
+            keys['X'] = held(SDL_GAMEPAD_BUTTON_DPAD_DOWN);
+            keys['C'] = held(SDL_GAMEPAD_BUTTON_DPAD_LEFT);
+            keys['V'] = held(SDL_GAMEPAD_BUTTON_DPAD_RIGHT);
+        } else {
+            keys['M'] = held(SDL_GAMEPAD_BUTTON_DPAD_LEFT);
+            keys['F'] = held(SDL_GAMEPAD_BUTTON_DPAD_RIGHT);
+            if (held(SDL_GAMEPAD_BUTTON_DPAD_UP))
+                wheel = 1;
+            else if (held(SDL_GAMEPAD_BUTTON_DPAD_DOWN))
+                wheel = -1;
+        }
+
+        if (menu) {
+            buttons[plasma::MOUSE_BUTTON_LEFT] = held(SDL_GAMEPAD_BUTTON_SOUTH);
+            buttons[plasma::MOUSE_BUTTON_RIGHT] = held(SDL_GAMEPAD_BUTTON_WEST);
+            if (rightY < -0.5f)
+                wheel = 1;
+            else if (rightY > 0.5f)
+                wheel = -1;
+            // B closes the topmost window the keyboard closes with a key.
+            if (pressed & (1u << SDL_GAMEPAD_BUTTON_EAST)) {
+                if (g_game->m_mapOpen)
+                    pulseKey = 'M';
+                else if (g_game->m_inventoryNode && g_game->m_inventoryNode->isVisible())
+                    pulseKey = 'I';
+                else if (g_game->m_craftingNode && g_game->m_craftingNode->isVisible())
+                    pulseKey = 'C';
+                else if (g_game->m_skillsOpen)
+                    pulseKey = 'X';
+                else if (g_game->m_systemPanel && g_game->m_systemPanel->isVisible())
+                    pulseKey = 'O';
+                else if (g_game->m_gameMenuOpen)
+                    pulseKey = VK_ESCAPE;
+            }
+            if (leftX != 0.0f || leftY != 0.0f) {
+                if (!g_padPointer) {
+                    g_padPointerX = g_engine->getPointer()[0];
+                    g_padPointerY = g_engine->getPointer()[1];
+                    g_padPointer = true;
+                }
+                // Squared, so that small deflections move finely.
+                float speed = sqrtf(leftX * leftX + leftY * leftY) * PadPointerSpeed * g_backBufferHeight *
+                              milliseconds * 0.001f;
+                g_padPointerX = SDL_clamp(g_padPointerX + leftX * speed, 0.0f, (float)(g_backBufferWidth - 1));
+                g_padPointerY = SDL_clamp(g_padPointerY + leftY * speed, 0.0f, (float)(g_backBufferHeight - 1));
+            }
+        } else {
+            buttons[plasma::MOUSE_BUTTON_LEFT] = held(SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER);
+            buttons[plasma::MOUSE_BUTTON_RIGHT] = held(PadRightTrigger);
+            buttons[plasma::MOUSE_BUTTON_MIDDLE] = held(SDL_GAMEPAD_BUTTON_LEFT_SHOULDER);
+            if (layer) {
+                g_padHeld[InputKey1] = held(SDL_GAMEPAD_BUTTON_WEST);
+                g_padHeld[InputKey2] = held(SDL_GAMEPAD_BUTTON_NORTH);
+                g_padHeld[InputKey3] = held(SDL_GAMEPAD_BUTTON_EAST);
+                g_padHeld[InputKey4] = held(SDL_GAMEPAD_BUTTON_SOUTH);
+            } else {
+                g_padHeld[InputKeySpace] = held(SDL_GAMEPAD_BUTTON_EAST);
+                g_padHeld[InputKeyR] = held(SDL_GAMEPAD_BUTTON_SOUTH);
+                g_padHeld[InputKeyE] = held(SDL_GAMEPAD_BUTTON_SOUTH);
+                g_padHeld[InputKeyQ] = held(SDL_GAMEPAD_BUTTON_WEST);
+                g_padHeld[InputKeyControl] = held(SDL_GAMEPAD_BUTTON_NORTH);
+                // B again in the air opens the glider (key G), as jumping in the air does in the release.
+                if ((pressed & (1u << SDL_GAMEPAD_BUTTON_EAST)) && g_game->m_player) {
+                    const Creature::EntityData &player = g_game->m_player->m_entityData;
+                    if (!player.binaryToggles.gliding &&
+                        !(player.flags & ((1 << CreatureFlagOnGround) | (1 << CreatureFlagInWater))))
+                        pulseKey = 'G';
+                }
+            }
+            g_padHeld[InputKeyT] = held(SDL_GAMEPAD_BUTTON_LEFT_STICK);
+            keys[VK_TAB] = held(SDL_GAMEPAD_BUTTON_RIGHT_STICK);
+            g_padMove = plasma::Vector<2, int>((int)(leftX * 32767.0f), (int)(-leftY * 32767.0f));
+            // Squared like the cursor; down turns the camera down as the mouse does. A mouse unit turns
+            // cameraSpeed * 0.005 degrees.
+            float degreesPerUnit = (g_game->m_options.cameraSpeed > 0 ? g_game->m_options.cameraSpeed : 1) * 0.005f;
+            float turn = sqrtf(rightX * rightX + rightY * rightY) * PadLookSpeed / degreesPerUnit * milliseconds *
+                         0.001f;
+            g_mouseDeltaX += rightX * turn;
+            g_mouseDeltaY += rightY * turn;
+        }
+    }
+
+    static bool s_keys[256];
+    for (int key = 0; key < 256; key++) {
+        if (keys[key] != s_keys[key]) {
+            s_keys[key] = keys[key];
+            padKey((unsigned char)key, keys[key]);
+        }
+    }
+    if (pulseKey) {
+        padKey((unsigned char)pulseKey, true);
+        padKey((unsigned char)pulseKey, false);
+    }
+    for (int button = 0; button < 3; button++) {
+        if (buttons[button] != g_padButtons[button]) {
+            g_padButtons[button] = buttons[button];
+            if (buttons[button])
+                g_game->handleButtonDown(button);
+            else
+                g_game->handleButtonUp(button);
+        }
+    }
+    // The wheel steps once on the press, then repeats while held.
+    static int s_wheel;
+    static int s_wheelDelay;
+    if (wheel != s_wheel) {
+        s_wheel = wheel;
+        s_wheelDelay = 0;
+        if (wheel) {
+            g_game->handleMouseWheel(wheel);
+            s_wheelDelay = PadFirstRepeat;
+        }
+    } else if (wheel) {
+        s_wheelDelay -= milliseconds;
+        if (s_wheelDelay <= 0) {
+            g_game->handleMouseWheel(wheel);
+            s_wheelDelay = PadRepeat;
+        }
+    }
+}
+
 // The window procedure's part: device resets on size and focus changes, typed characters, keys,
 // buttons and the wheel. Returns false when the window is closed.
 static bool handleEvent(const SDL_Event &event)
@@ -231,6 +469,23 @@ static bool handleEvent(const SDL_Event &event)
     case SDL_EVENT_MOUSE_MOTION:
         g_mouseDeltaX += event.motion.xrel;
         g_mouseDeltaY += event.motion.yrel;
+        g_padPointer = false;
+        break;
+    case SDL_EVENT_GAMEPAD_ADDED:
+        if (!g_gamepad)
+            g_gamepad = SDL_OpenGamepad(event.gdevice.which);
+        break;
+    case SDL_EVENT_GAMEPAD_REMOVED:
+        if (g_gamepad && SDL_GetGamepadID(g_gamepad) == event.gdevice.which) {
+            SDL_CloseGamepad(g_gamepad);
+            g_gamepad = nullptr;
+            // Another connected pad takes over.
+            int count = 0;
+            SDL_JoystickID *pads = SDL_GetGamepads(&count);
+            if (pads && count > 0)
+                g_gamepad = SDL_OpenGamepad(pads[0]);
+            SDL_free(pads);
+        }
         break;
     }
     return true;
@@ -391,7 +646,7 @@ int main(int argc, char **argv)
     WSAStartup(MAKEWORD(2, 2), &winsock);
 
     SDL_SetHint(SDL_HINT_APP_ID, "infinite-cubes-alpha-linux");
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD)) {
         showError(SDL_GetError());
         return 0;
     }
@@ -502,8 +757,10 @@ int main(int argc, char **argv)
                 g_cursorShown = true;
             } else if (focused) {
                 g_cursorShown = false;
+                g_padPointer = false;
             }
         }
+        updateGamepad(g_readInput && focused);
         if (g_readInput && focused) {
             const bool *keys = SDL_GetKeyboardState(nullptr);
             g_game->m_inputs[InputKeyW] = keys[SDL_SCANCODE_W];
@@ -520,7 +777,12 @@ int main(int argc, char **argv)
             float x, y;
             SDL_MouseButtonFlags buttons = SDL_GetMouseState(&x, &y);
             if (g_game->isCursorVisible()) {
-                cursorPosition(x, y);
+                if (g_padPointer) {
+                    x = g_padPointerX;
+                    y = g_padPointerY;
+                } else {
+                    cursorPosition(x, y);
+                }
                 g_game->handleMouseMove(x, y);
             } else {
                 g_game->handleMouseMove(g_mouseDeltaX, g_mouseDeltaY);
@@ -533,8 +795,16 @@ int main(int argc, char **argv)
             g_game->m_inputs[InputKey2] = keys[SDL_SCANCODE_2];
             g_game->m_inputs[InputKey3] = keys[SDL_SCANCODE_3];
             g_game->m_inputs[InputKey4] = keys[SDL_SCANCODE_4];
-            g_game->m_moveStick = plasma::Vector<2, int>(0, 0);
+            g_game->m_moveStick = g_padMove;
             g_game->m_lookStick = plasma::Vector<2, int>(0, 0);
+            // The pad's keys and buttons count as well.
+            for (int i = 0; i < InputCount; i++)
+                g_game->m_inputs[i] = g_game->m_inputs[i] || g_padHeld[i];
+            g_game->m_inputs[InputMouseLeft] = g_game->m_inputs[InputMouseLeft] || g_padButtons[plasma::MOUSE_BUTTON_LEFT];
+            g_game->m_inputs[InputMouseRight] =
+                g_game->m_inputs[InputMouseRight] || g_padButtons[plasma::MOUSE_BUTTON_RIGHT];
+            g_game->m_inputs[InputMouseMiddle] =
+                g_game->m_inputs[InputMouseMiddle] || g_padButtons[plasma::MOUSE_BUTTON_MIDDLE];
         }
         g_mouseDeltaX = 0.0f;
         g_mouseDeltaY = 0.0f;
@@ -554,6 +824,8 @@ int main(int argc, char **argv)
         g_device->Release();
     if (g_direct3d)
         g_direct3d->Release();
+    if (g_gamepad)
+        SDL_CloseGamepad(g_gamepad);
     SDL_DestroyWindow(g_window);
     SDL_Quit();
     WSACleanup();
