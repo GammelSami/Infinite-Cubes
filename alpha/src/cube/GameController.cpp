@@ -2584,6 +2584,23 @@ void GameController::connect(const std::string &address)
                     m_world.leaveRegions();
                     break;
                 }
+                case PacketTeleport: {
+                    plasma::Vector<3, Fixed> position;
+                    if (receiveAll(m_socket, (char *)&position, sizeof(position), 0) == SOCKET_ERROR) {
+                        disconnected = true;
+                        break;
+                    }
+                    m_world.enterRegions();
+                    m_player->m_entityData.position = position;
+                    m_player->m_entityData.origin = position;
+                    m_player->m_entityData.velocity = plasma::Vector<3, float>(0.0f, 0.0f, 0.0f);
+                    m_player->m_drawnPosition = position;
+                    m_player->m_previousDrawnPosition = position;
+                    m_player->m_fallStartHeight = (float)position[2];
+                    m_cameraFocus = position;
+                    m_world.leaveRegions();
+                    break;
+                }
                 case PacketTime: {
                     int day;
                     int time;

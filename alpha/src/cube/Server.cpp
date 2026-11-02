@@ -36,6 +36,7 @@ template<class T> void writeList(BytesIO &data, const std::list<T> &list)
 }
 
 Connection::Connection()
+    : teleportPending(false)
 {
     InitializeCriticalSectionAndSpinCount(&lock, 0x80000400);
 }
@@ -268,7 +269,9 @@ void Server::start()
                 continue;
             }
             if (version != ProtocolVersion) {
+                int reply = PacketHello;
                 int serverVersion = ProtocolVersion;
+                send(client, (char *)&reply, sizeof(reply), 0);
                 send(client, (char *)&serverVersion, sizeof(serverVersion), 0);
                 Sleep(500);
                 closesocket(client);
@@ -454,6 +457,29 @@ void Server::start()
                             } else {
                                 reply = L"Usage: /time dawn|morning|day|noon|afternoon|evening|dusk|night|midnight";
                             }
+                        } else if (command == L"/tp") {
+                            Connection *from = 0, *to = 0;
+                            for (int i = 0; i < (int)connections.size(); ++i) {
+                                Connection *candidate = connections[i];
+                                if (!candidate) continue;
+                                Creature *player = world->creatureByID(candidate->creatureId);
+                                if (!player) continue;
+                                std::string name(player->m_entityData.name);
+                                std::wstring wideName(name.begin(), name.end());
+                                if (wideName == first) from = candidate;
+                                if (wideName == second) to = candidate;
+                            }
+                            if (!first.empty() && !second.empty() && extra.empty() && from && to) {
+                                Creature *source = world->creatureByID(from->creatureId);
+                                Creature *target = world->creatureByID(to->creatureId);
+                                from->teleportPosition = target->m_entityData.position;
+                                from->teleportPending = true;
+                                source->m_entityData.position = from->teleportPosition;
+                                source->m_entityData.origin = from->teleportPosition;
+                                reply = L"Teleported " + first + L" to " + second + L".";
+                            } else {
+                                reply = L"Usage: /tp <online player> <online player> (exact names)";
+                            }
                         } else {
                             for (int i = 0; i < (int)connections.size(); i++) {
                                 if (!connections[i]) continue;
@@ -621,6 +647,12 @@ void Server::start()
                     world->enterRegions();
                     int time = world->m_time;
                     int day = world->m_day;
+                    bool teleport = connections[slot]->teleportPending;
+                    plasma::Vector<3, Fixed> teleportPosition;
+                    if (teleport) {
+                        teleportPosition = connections[slot]->teleportPosition;
+                        connections[slot]->teleportPending = false;
+                    }
                     ServerUpdates updates(connections[slot]->updates);
                     // The code leaves a critical section it never entered.
                     LeaveCriticalSection(&connections[slot]->lock);
@@ -645,6 +677,12 @@ void Server::start()
                     }
                     world->leaveRegions();
 
+                    if (teleport) {
+                        packetId = PacketTeleport;
+                        if (send(connections[slot]->socket, (char *)&packetId, sizeof(packetId), 0) == SOCKET_ERROR ||
+                            send(connections[slot]->socket, (char *)&teleportPosition, sizeof(teleportPosition), 0) == SOCKET_ERROR)
+                            break;
+                    }
                     packetId = PacketTime;
                     if (send(connections[slot]->socket, (char *)&packetId, sizeof(packetId), 0) == SOCKET_ERROR)
                         break;

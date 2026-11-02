@@ -4,6 +4,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include "cube/Fixed.h"
 #include "cube/ServerUpdates.h"
 #include "plasma/Vector.h"
 
@@ -30,12 +31,13 @@ enum PacketId {
     PacketSeed = 15,      // server -> client: the world seed
     PacketWelcome = 16,   // server -> client: the connection is accepted
     PacketHello = 17,     // client -> server: first packet, then the version
-    PacketServerFull = 18 // server -> client: no room for another player
+    PacketServerFull = 18, // server -> client: no room for another player
+    PacketTeleport = 19    // server -> client: move this player to the given position
 };
 
 // The version a client must send after PacketHello; a server with another version answers with its
 // own and closes the connection.
-const int ProtocolVersion = 3;
+const int ProtocolVersion = 4;
 const unsigned short ServerPort = 12345;
 // Creature ids 1..10 are the players'.
 const int MaxPlayers = 10;
@@ -56,6 +58,8 @@ struct Connection {
         std::wstring text;
     };
     std::list<ChatLine> chat;
+    plasma::Vector<3, Fixed> teleportPosition;
+    bool teleportPending;
     CRITICAL_SECTION lock;
 };
 struct HitPacket;
