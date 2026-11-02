@@ -13,6 +13,7 @@
 #include "Thread.h"
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <mmsystem.h>
 
 namespace cube {
@@ -432,13 +433,41 @@ void Server::start()
                             continue;
                         }
                         std::wstring text(units.begin(), units.end());
-                        // To every connection; an empty slot is not checked.
                         world->enterRegions();
-                        for (int i = 0; i < (int)connections.size(); i++) {
+                        std::wistringstream input(text);
+                        std::wstring command, first, second, extra;
+                        input >> command >> first >> second >> extra;
+                        std::wstring reply;
+                        if (command == L"/time") {
+                            int hour = -1;
+                            if (first == L"midnight") hour = 0;
+                            else if (first == L"dawn") hour = 6;
+                            else if (first == L"morning") hour = 8;
+                            else if (first == L"day" || first == L"noon") hour = 12;
+                            else if (first == L"afternoon") hour = 15;
+                            else if (first == L"evening") hour = 18;
+                            else if (first == L"dusk") hour = 19;
+                            else if (first == L"night") hour = 22;
+                            if (hour >= 0 && second.empty()) {
+                                world->m_time = hour * World::MillisecondsPerHour;
+                                reply = L"Time set to " + first + L".";
+                            } else {
+                                reply = L"Usage: /time dawn|morning|day|noon|afternoon|evening|dusk|night|midnight";
+                            }
+                        } else {
+                            for (int i = 0; i < (int)connections.size(); i++) {
+                                if (!connections[i]) continue;
+                                Connection::ChatLine line;
+                                line.text = text;
+                                line.creatureId = creatureId;
+                                connections[i]->chat.push_back(line);
+                            }
+                        }
+                        if (!reply.empty()) {
                             Connection::ChatLine line;
-                            line.text = text;
-                            line.creatureId = creatureId;
-                            connections[i]->chat.push_back(line);
+                            line.text = reply;
+                            line.creatureId = -1;
+                            connections[slot]->chat.push_back(line);
                         }
                         world->leaveRegions();
                         break;
