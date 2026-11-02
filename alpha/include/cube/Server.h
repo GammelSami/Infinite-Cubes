@@ -32,7 +32,8 @@ enum PacketId {
     PacketWelcome = 16,   // server -> client: the connection is accepted
     PacketHello = 17,     // client -> server: first packet, then the version
     PacketServerFull = 18, // server -> client: no room for another player
-    PacketTeleport = 19    // server -> client: move this player to the given position
+    PacketTeleport = 19,   // server -> client: move this player to the given position
+    PacketLevel = 20       // server -> client: set this player's level
 };
 
 // The version a client must send after PacketHello; a server with another version answers with its
@@ -60,6 +61,7 @@ struct Connection {
     std::list<ChatLine> chat;
     plasma::Vector<3, Fixed> teleportPosition;
     bool teleportPending;
+    int pendingLevel; // zero means no level change queued
     CRITICAL_SECTION lock;
 };
 struct HitPacket;

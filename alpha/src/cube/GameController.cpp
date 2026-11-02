@@ -2601,6 +2601,20 @@ void GameController::connect(const std::string &address)
                     m_world.leaveRegions();
                     break;
                 }
+                case PacketLevel: {
+                    int level;
+                    if (receiveAll(m_socket, (char *)&level, sizeof(level), 0) == SOCKET_ERROR) {
+                        disconnected = true;
+                        break;
+                    }
+                    m_world.enterRegions();
+                    m_player->m_entityData.level = level;
+                    m_player->m_entityData.xp = 0;
+                    m_player->m_entityData.hp = m_player->maxHP();
+                    m_player->m_shownXp = 0;
+                    m_world.leaveRegions();
+                    break;
+                }
                 case PacketTime: {
                     int day;
                     int time;
@@ -7931,7 +7945,10 @@ void GameController::update(int milliseconds)
 
     // A level up rises "LEVEL UP!" over the player with sound 29 and teaches the level's formulas;
     // gained xp rises "XP +n" and is reported in the chat.
+    if (m_player->m_entityData.level < m_player->m_shownLevel)
+        m_player->m_shownLevel = m_player->m_entityData.level;
     if (m_player->m_entityData.level != m_player->m_shownLevel) {
+        int previousLevel = m_player->m_shownLevel;
         TextFX levelUp;
         levelUp.color = plasma::Vector<4, float>(0.8f, 0.6f, 1.0f, 1.0f);
         levelUp.textFlags = 1 << plasma::TEXT_RIGHT;
@@ -7947,7 +7964,8 @@ void GameController::update(int milliseconds)
         playSound(SoundLevelUp2, m_player->m_entityData.position, 1.0f, 1.0f);
         m_player->m_shownLevel = m_player->m_entityData.level;
         m_player->m_shownXp = 0;
-        learnFormulas(m_player->m_entityData.level);
+        for (int level = previousLevel + 1; level <= m_player->m_entityData.level; ++level)
+            learnFormulas(level);
     }
     if ((int)m_player->m_shownXp < m_player->m_entityData.xp) {
         TextFX gain;

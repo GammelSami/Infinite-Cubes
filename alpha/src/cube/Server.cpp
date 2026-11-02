@@ -36,7 +36,7 @@ template<class T> void writeList(BytesIO &data, const std::list<T> &list)
 }
 
 Connection::Connection()
-    : teleportPending(false)
+    : teleportPending(false), pendingLevel(0)
 {
     InitializeCriticalSectionAndSpinCount(&lock, 0x80000400);
 }
@@ -480,6 +480,21 @@ void Server::start()
                             } else {
                                 reply = L"Usage: /tp <online player> <online player> (exact names)";
                             }
+                        } else if (command == L"/level") {
+                            int level = 0;
+                            std::wistringstream number(first);
+                            wchar_t trailing;
+                            if (!first.empty() && second.empty() && number >> level && !(number >> trailing) &&
+                                level >= 1 && level <= 1000) {
+                                Creature *player = world->creatureByID(creatureId);
+                                player->m_entityData.level = level;
+                                player->m_entityData.xp = 0;
+                                player->m_entityData.hp = player->maxHP();
+                                connections[slot]->pendingLevel = level;
+                                reply = L"Level set to " + first + L".";
+                            } else {
+                                reply = L"Usage: /level <1-1000>";
+                            }
                         } else {
                             for (int i = 0; i < (int)connections.size(); i++) {
                                 if (!connections[i]) continue;
@@ -648,6 +663,8 @@ void Server::start()
                     int time = world->m_time;
                     int day = world->m_day;
                     bool teleport = connections[slot]->teleportPending;
+                    int pendingLevel = connections[slot]->pendingLevel;
+                    connections[slot]->pendingLevel = 0;
                     plasma::Vector<3, Fixed> teleportPosition;
                     if (teleport) {
                         teleportPosition = connections[slot]->teleportPosition;
@@ -681,6 +698,12 @@ void Server::start()
                         packetId = PacketTeleport;
                         if (send(connections[slot]->socket, (char *)&packetId, sizeof(packetId), 0) == SOCKET_ERROR ||
                             send(connections[slot]->socket, (char *)&teleportPosition, sizeof(teleportPosition), 0) == SOCKET_ERROR)
+                            break;
+                    }
+                    if (pendingLevel) {
+                        packetId = PacketLevel;
+                        if (send(connections[slot]->socket, (char *)&packetId, sizeof(packetId), 0) == SOCKET_ERROR ||
+                            send(connections[slot]->socket, (char *)&pendingLevel, sizeof(pendingLevel), 0) == SOCKET_ERROR)
                             break;
                     }
                     packetId = PacketTime;
